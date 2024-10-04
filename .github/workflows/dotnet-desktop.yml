@@ -21,20 +21,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'  # Change the .NET version as per your project requirements
-          
-      # Change directory to TournamentOrganizer.api where the .sln file is
-      - name: Change directory to solution folder
-        working-directory: ./TournamentOrganizer.api
-        
+          dotnet-version: '7.0.x'  # Adjust according to your .NET version
+
       # Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ./TournamentOrganizer.api/TournamentOrganizer.api.sln
 
       # Build the solution
       - name: Build the solution
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build ./TournamentOrganizer.api/TournamentOrganizer.api.sln --configuration Release --no-restore
 
       # Run tests
       - name: Run tests
-        run: dotnet test --no-restore --verbosity normal --configuration Release
+        run: dotnet test ./TournamentOrganizer.api/TournamentOrganizer.api.sln --no-restore --verbosity normal --configuration Release
