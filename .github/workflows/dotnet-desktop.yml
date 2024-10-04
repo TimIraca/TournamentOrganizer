@@ -1,0 +1,35 @@
+name: ASP.NET Web API CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest  # Using windows-latest as per the original template
+
+    env:
+      Solution_Name: TournamentOrganizer.api.sln    # Replace with your solution name
+      Test_Project_Path: TournamentOrganizerTests/TournamentOrganizerTests.csproj  # Replace with the path to your test project
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x  # Adjust this version if needed
+
+    - name: Restore dependencies
+      run: dotnet restore $env:Solution_Name
+
+    - name: Build
+      run: dotnet build $env:Solution_Name --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test $env:Test_Project_Path --no-build --verbosity normal
