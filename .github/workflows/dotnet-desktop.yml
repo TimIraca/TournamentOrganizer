@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-latest  # Using windows-latest as per the original template
 
     env:
-      Solution_Name: TournamentOrganizer.api.sln    # Replace with your solution name
+      Solution_Name: TournamentOrganizer.api/TournamentOrganizer.api.sln    # Replace with your solution name
       Test_Project_Path: TournamentOrganizerTests/TournamentOrganizerTests.csproj  # Replace with the path to your test project
 
     steps:
