@@ -12,7 +12,7 @@ jobs:
 
     env:
       Solution_Name: TournamentOrganizer.api/TournamentOrganizer.api.sln    # Replace with your solution name
-      Test_Project_Path: TournamentOrganizerTests/TournamentOrganizerTests.csproj  # Replace with the path to your test project
+      Test_Project_Path: TournamentOrganizer.api/TournamentOrganizerTests/TournamentOrganizerTests.csproj  # Replace with the path to your test project
 
     steps:
     - name: Checkout
