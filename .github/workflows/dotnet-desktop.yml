@@ -22,7 +22,11 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'  # Change the .NET version as per your project requirements
-
+          
+      # Change directory to TournamentOrganizer.api where the .sln file is
+      - name: Change directory to solution folder
+        working-directory: ./TournamentOrganizer.api
+        
       # Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
