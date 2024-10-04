@@ -30,3 +30,6 @@ jobs:
 
     - name: Build
       run: dotnet build TournamentOrganizer.api/TournamentOrganizer.api.sln
+      
+    - name: Test
+      run: dotnet test $env:Test_Project_Path --no-build --verbosity normal
