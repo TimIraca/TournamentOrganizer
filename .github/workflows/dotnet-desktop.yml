@@ -1,0 +1,36 @@
+name: CI for ASP.NET Web API
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup .NET environment
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'  # Adjust according to your .NET version
+
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore ./TournamentOrganizer.api/TournamentOrganizer.api.sln
+
+      # Build the solution
+      - name: Build the solution
+        run: dotnet build ./TournamentOrganizer.api/TournamentOrganizer.api.sln --configuration Release --no-restore
+
+      # Run tests
+      - name: Run tests
+        run: dotnet test ./TournamentOrganizer.api/TournamentOrganizer.api.sln --no-restore --verbosity normal --configuration Release
