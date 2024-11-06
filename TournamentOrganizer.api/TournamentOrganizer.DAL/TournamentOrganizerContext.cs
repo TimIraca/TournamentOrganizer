@@ -3,60 +3,37 @@ using TournamentOrganizer.Domain.Models;
 
 namespace TournamentOrganizer.DAL
 {
-    public class TournamentOrganizerContext : DbContext
+    public class TournamentContext : DbContext
     {
-        public TournamentOrganizerContext(DbContextOptions<TournamentOrganizerContext> options)
+        public TournamentContext(DbContextOptions<TournamentContext> options)
             : base(options) { }
 
         public DbSet<Tournament> Tournaments { get; set; }
-        public DbSet<Player> Players { get; set; }
+        public DbSet<TournamentParticipant> TournamentParticipants { get; set; }
+        public DbSet<Match> Matches { get; set; }
+        public DbSet<PrizeDistribution> PrizeDistributions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder
-                .Entity<Tournament>()
-                .HasData(
-                    new Tournament
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Spring Championship",
-                        StartDate = DateTime.Now.AddMonths(1),
-                        EndDate = DateTime.Now.AddMonths(1).AddDays(7),
-                        RankingSystem = RankingSystem.RoundRobin,
-                    },
-                    new Tournament
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Summer Showdown",
-                        StartDate = DateTime.Now.AddMonths(3),
-                        EndDate = DateTime.Now.AddMonths(3).AddDays(10),
-                        RankingSystem = RankingSystem.SingleElimination,
-                    }
-                );
+            modelBuilder.Entity<Tournament>().Property(t => t.Name).IsRequired().HasMaxLength(100);
+
+            modelBuilder.Entity<Tournament>().Property(t => t.PrizePool).HasPrecision(18, 2);
+
+            modelBuilder.Entity<PrizeDistribution>().Property(p => p.Percentage).HasPrecision(5, 2);
 
             modelBuilder
-                .Entity<Player>()
-                .HasData(
-                    new Player
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Alice",
-                        Ranking = 1200,
-                    },
-                    new Player
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Bob",
-                        Ranking = 1250,
-                    },
-                    new Player
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Charlie",
-                        Ranking = 1150,
-                    }
-                );
+                .Entity<Match>()
+                .HasOne(m => m.Participant1)
+                .WithMany()
+                .HasForeignKey(m => m.Participant1Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder
+                .Entity<Match>()
+                .HasOne(m => m.Participant2)
+                .WithMany()
+                .HasForeignKey(m => m.Participant2Id)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

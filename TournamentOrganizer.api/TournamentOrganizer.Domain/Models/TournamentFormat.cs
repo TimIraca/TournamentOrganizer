@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace TournamentOrganizer.Domain.Models
 {
-    public class Player
+    public enum TournamentFormat
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public int Ranking { get; set; }
+        SingleElimination,
+        DoubleElimination,
+        RoundRobin,
     }
 }

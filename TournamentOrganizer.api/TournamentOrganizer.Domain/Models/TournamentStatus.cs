@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace TournamentOrganizer.Domain.Models
 {
-    public enum RankingSystem
+    public enum TournamentStatus
     {
-        RoundRobin,
-        SingleElimination,
-        DoubleElimination
+        Registration,
+        InProgress,
+        Completed,
     }
 }
