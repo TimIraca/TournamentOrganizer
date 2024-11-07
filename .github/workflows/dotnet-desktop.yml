@@ -21,16 +21,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '7.0.x'  # Adjust according to your .NET version
+          dotnet-version: "8.0.x" # Adjust according to your .NET version
 
       # Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore ./TournamentOrganizer.api/TournamentOrganizer.api.sln
+        run: dotnet restore ./TournamentOrganizer/TournamentOrganizer.api.sln
 
       # Build the solution
       - name: Build the solution
-        run: dotnet build ./TournamentOrganizer.api/TournamentOrganizer.api.sln --configuration Release --no-restore
+        run: dotnet build ./TournamentOrganizer/TournamentOrganizer.api.sln --configuration Release --no-restore
 
       # Run tests
       - name: Run tests
-        run: dotnet test ./TournamentOrganizer.api/TournamentOrganizer.api.sln --no-restore --verbosity normal --configuration Release
+        run: dotnet test ./TournamentOrganizer/TournamentOrganizer.api.sln --no-restore --verbosity normal --configuration Release
