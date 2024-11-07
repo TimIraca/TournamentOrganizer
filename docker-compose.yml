@@ -2,9 +2,9 @@ version: '3.9'
 
 services:
   webapi:
-    image: timiraca/tournament-organizer-api:latest
+    image: timiraca/tournamentorganizer:latest
     build:
-      context: .
+      context: ./TournamentOrganizer
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
