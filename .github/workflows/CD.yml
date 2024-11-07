@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: Container
+    environment: production
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
@@ -24,7 +24,7 @@ jobs:
       - name: Build and push API image
         uses: docker/build-push-action@v5
         with:
-          context: ./TournamentOrganizer
+          context: .
           file: ./TournamentOrganizer/TournamentOrganizer/Dockerfile
           push: true
           tags: timiraca/tournament_organizer_api:latest
@@ -37,68 +37,53 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4.2.2
       
-      - name: Create docker-compose.yml
-        run: |
-          cat > docker-compose.yml << 'EOL'
-          version: '3.8'
-
-          services:
-            sql:
-              image: mcr.microsoft.com/mssql/server:2022-latest
-              environment:
-                - ACCEPT_EULA=Y
-                - MSSQL_SA_PASSWORD=${SQL_SA_PASSWORD}
-              ports:
-                - "1433:1433"
-              volumes:
-                - sql_data:/var/opt/mssql
-              healthcheck:
-                test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "${SQL_SA_PASSWORD}" -Q "SELECT 1" -b -o /dev/null
-                interval: 10s
-                timeout: 3s
-                retries: 10
-                start_period: 10s
-              restart: unless-stopped
-
-            api:
-              image: timiraca/tournament_organizer_api:latest
-              ports:
-                - "8080:8080"
-                - "8081:8081"
-              environment:
-                - ConnectionStrings__DefaultConnection=Server=sql;Database=TournamentOrganizer;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True
-              depends_on:
-                sql:
-                  condition: service_healthy
-              restart: unless-stopped
-
-          volumes:
-            sql_data:
-              driver: local
-          EOL
-      
       - name: Create initialization script
         run: |
-          cat > init-db.sh << 'EOL'
-          #!/bin/bash
-          
-          # Wait for SQL Server to be ready
-          sleep 30
-          
-          # Create the database if it doesn't exist
-          /opt/mssql-tools/bin/sqlcmd -S sql -U sa -P "${SQL_SA_PASSWORD}" -Q "
+          cat > init.sql << 'EOL'
           IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TournamentOrganizer')
           BEGIN
               CREATE DATABASE TournamentOrganizer;
           END
-          "
           EOL
-          chmod +x init-db.sh
       
       - name: Deploy using Docker Compose
         env:
           SQL_SA_PASSWORD: ${{ secrets.SQL_SA_PASSWORD }}
         run: |
+          # Stop and remove existing containers
+          docker compose down --volumes --remove-orphans || true
+          
+          # Pull latest images
           docker compose pull
+          
+          # Start services
           docker compose up -d
-          docker compose exec sql /bin/bash -c "./init-db.sh"
+          
+          # Wait for SQL Server to be healthy
+          echo "Waiting for SQL Server to be ready..."
+          timeout=180
+          elapsed=0
+          interval=10
+          while [ $elapsed -lt $timeout ]; do
+            if docker compose ps sql | grep -q "healthy"; then
+              echo "SQL Server is ready!"
+              
+              # Initialize database
+              echo "Initializing database..."
+              docker compose exec -T sql /opt/mssql-tools/bin/sqlcmd \
+                -S localhost \
+                -U sa \
+                -P "$SQL_SA_PASSWORD" \
+                -i init.sql
+              
+              echo "Database initialization completed"
+              exit 0
+            fi
+            sleep $interval
+            elapsed=$((elapsed + interval))
+            echo "Still waiting... ($elapsed seconds elapsed)"
+          done
+          
+          echo "Timeout waiting for SQL Server to be ready"
+          docker compose logs sql
+          exit 1
