@@ -10,13 +10,13 @@ import type {
 } from '@/types';
 
 const api = axios.create({
-    baseURL: 'https://localhost:7282/api/' // Set your API link here
+    baseURL: 'https://localhost:7180/api/' // Set your API link here
 });
 
 export const tournamentApi = {
     // Tournament endpoints
     getAllTournaments: async () => {
-        const response = await api.get<Tournament[]>('/tournaments');
+        const response = await api.get<Tournament[]>('/Tournament');
         return response.data;
     },
 
@@ -32,7 +32,7 @@ export const tournamentApi = {
 
     // Participant endpoints
     getParticipants: async (tournamentId: string) => {
-        const response = await api.get<Participant[]>(`/tournaments/${tournamentId}/participants`);
+        const response = await api.get<Participant[]>(`/Participant/tournament/${tournamentId}`);
         return response.data;
     },
 
