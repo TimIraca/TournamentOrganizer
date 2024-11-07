@@ -24,7 +24,7 @@ jobs:
       - name: Build and push API image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./TournamentOrganizer
           file: ./TournamentOrganizer/TournamentOrganizer/Dockerfile
           push: true
           tags: timiraca/tournament_organizer_api:latest
