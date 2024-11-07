@@ -25,12 +25,12 @@ jobs:
 
       # Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore ./TournamentOrganizer/TournamentOrganizer.api.sln
+        run: dotnet restore ./TournamentOrganizer/TournamentOrganizer.sln
 
       # Build the solution
       - name: Build the solution
-        run: dotnet build ./TournamentOrganizer/TournamentOrganizer.api.sln --configuration Release --no-restore
+        run: dotnet build ./TournamentOrganizer/TournamentOrganizer.sln --configuration Release --no-restore
 
       # Run tests
       - name: Run tests
-        run: dotnet test ./TournamentOrganizer/TournamentOrganizer.api.sln --no-restore --verbosity normal --configuration Release
+        run: dotnet test ./TournamentOrganizer/TournamentOrganizer.sln --no-restore --verbosity normal --configuration Release
