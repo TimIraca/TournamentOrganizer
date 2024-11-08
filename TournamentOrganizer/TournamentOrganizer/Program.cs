@@ -16,7 +16,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         "AllowReactApp",
-        builder => builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader()
+        builder =>
+            builder
+                .WithOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:8080",
+                    "http://frontend:3000",
+                    "http://tournamentorganizer.api"
+                )
+                .AllowAnyMethod()
+                .AllowAnyHeader()
     );
 });
 
