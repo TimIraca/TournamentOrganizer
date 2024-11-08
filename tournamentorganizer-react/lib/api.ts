@@ -11,7 +11,7 @@ import type {
 
 // Get the API URL from environment variables with a fallback
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://tournamentorganizer.api:8080";
+  process.env.NEXT_PUBLIC_API_URL || "http://tournamentorganizer.api:8080/api";
 
 const api = axios.create({
   baseURL: API_URL,
