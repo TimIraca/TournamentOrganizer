@@ -1,0 +1,35 @@
+services:
+  tournamentorganizer.api:
+    image: ${DOCKER_REGISTRY-}tournamentorganizerapi
+    build:
+      context: .
+      dockerfile: TournamentOrganizer/Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Passw0rd
+      - MSSQL_PID=Express
+    volumes:
+      - sqldata:/var/opt/mssql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  sqldata:
