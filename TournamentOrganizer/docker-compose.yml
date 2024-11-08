@@ -14,6 +14,19 @@ services:
     networks:
       - app-network
 
+  frontend:
+    build:
+      context: ../tournamentorganizer-react
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://tournamentorganizer.api
+    depends_on:
+      - tournamentorganizer.api
+    networks:
+      - app-network
+
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
@@ -26,6 +39,7 @@ services:
       - sqldata:/var/opt/mssql
     networks:
       - app-network
+  
 
 networks:
   app-network:
