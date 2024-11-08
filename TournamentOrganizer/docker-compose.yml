@@ -6,8 +6,12 @@ services:
       dockerfile: TournamentOrganizer/Dockerfile
     ports:
       - "8080:80"
+      - "8081:443"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80;https://+:443
+      - ASPNETCORE_HTTP_PORTS=80
+      - ASPNETCORE_HTTPS_PORTS=443
       - ConnectionStrings__DefaultConnection=Server=db;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
     depends_on:
       - db
@@ -21,7 +25,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://tournamentorganizer.api
+      - NEXT_PUBLIC_API_URL=http://tournamentorganizer.api:8081
     depends_on:
       - tournamentorganizer.api
     networks:

@@ -1,13 +1,4 @@
-import {
-  Trophy,
-  Users,
-  Calendar,
-  Settings,
-  BarChart,
-  HelpCircle,
-  MessageSquare,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -28,7 +19,7 @@ import {
 interface NavItem {
   title: string;
   url: string;
-  icon: any;
+  icon: React.ElementType;
   isActive?: boolean;
   items?: { title: string; url: string }[];
 }

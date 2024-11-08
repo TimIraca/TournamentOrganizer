@@ -1,50 +1,26 @@
-FROM node:18-alpine AS base
+FROM node:18-alpine
 
-# Install dependencies only when needed
-FROM base AS deps
 WORKDIR /app
 
-# Copy package files from tournamentorganizer-react directory
+# Copy package files
 COPY package.json package-lock.json* ./
 
 # Install dependencies
 RUN npm ci
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-# Copy all frontend files
+# Copy the rest of the application
 COPY . .
 
-# Build Next.js
+# Build the application
 RUN npm run build
 
-# Production image, copy all the files and run next
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy public files
-COPY --from=builder /app/public ./public
-
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Automatically leverage output traces to reduce image size
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
+# Expose port
 EXPOSE 3000
 
-ENV PORT 3000
+# Set host to allow connections from outside
 ENV HOSTNAME "0.0.0.0"
+ENV PORT 3000
+ENV NODE_ENV production
 
-CMD ["node", "server.js"]
+# Start the application
+CMD ["npm", "start"]

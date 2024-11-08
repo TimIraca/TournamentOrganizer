@@ -10,8 +10,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { tournamentApi, handleApiError } from "@/lib/api";
-import type { Tournament, TournamentFormat, TournamentStatus } from "@/types";
+import { handleApiError } from "@/lib/api";
+import type { Tournament, TournamentStatus } from "@/types";
 import { formatDate } from "@/lib/utils";
 
 interface TournamentDetailsProps {
