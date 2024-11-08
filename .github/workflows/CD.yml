@@ -34,8 +34,8 @@ jobs:
     - name: Build and push API image
       uses: docker/build-push-action@v4
       with:
-        context: ./TournamentOrganizer
-        file: TournamentOrganizer/Dockerfile
+        context: .
+        file: TournamentOrganizer/TournamentOrganizer/Dockerfile
         push: true
         tags: ${{ steps.meta-api.outputs.tags }}
         labels: ${{ steps.meta-api.outputs.labels }}
