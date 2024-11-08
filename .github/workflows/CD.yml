@@ -1,91 +1,41 @@
-# .github/workflows/docker-compose-publish.yml
-name: Docker Compose Build and Publish
+name: Docker CD
 
 on:
   push:
     branches: [ "main" ]  # or your default branch
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  API_IMAGE_NAME: tournamentorganizer-api
+  API_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/tournamentorganizer-api
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     environment: Container
-
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Build and push using existing docker-compose
-      - name: Build and push Docker Compose services
-        working-directory: ./TournamentOrganizer
-        run: |
-          # Export the DockerHub username for docker-compose to use
-          export DOCKER_REGISTRY=${{ env.DOCKERHUB_USERNAME }}/
-          
-          # Build all services
-          docker-compose build
-          
-          # Tag the API image with DockerHub registry and version
-          docker tag ${DOCKER_REGISTRY}tournamentorganizerapi:latest ${{ env.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE_NAME }}:latest
-          docker tag ${DOCKER_REGISTRY}tournamentorganizerapi:latest ${{ env.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE_NAME }}:${{ github.sha }}
-          
-          # Push both tags to DockerHub
-          docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE_NAME }}:latest
-          docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE_NAME }}:${{ github.sha }}
-
-      # Create deployment package with existing files
-      - name: Create deployment package
-        run: |
-          # Create deployment directory
-          mkdir -p deployment
-          
-          # Copy existing docker-compose file
-          cp TournamentOrganizer/docker-compose.yml deployment/
-          
-          # Create .env file template
-          cat > deployment/.env << EOL
-          DOCKER_REGISTRY=${{ env.DOCKERHUB_USERNAME }}/
-          DB_PASSWORD=YourStrong!Passw0rd
-          EOL
-          
-          # Create README with instructions
-          cat > deployment/README.md << EOL
-          # Tournament Organizer Deployment
-
-          ## Prerequisites
-          - Docker
-          - Docker Compose
-
-          ## Deployment Steps
-          1. Configure the .env file with your credentials
-          2. Run \`docker-compose up -d\`
-
-          ## Environment Variables
-          - DOCKER_REGISTRY: Your DockerHub username with trailing slash (e.g., username/)
-          - DB_PASSWORD: SQL Server password
-          EOL
-
-          # Create deployment archive
-          cd deployment
-          zip -r ../tournament-organizer-deploy.zip *
-
-      # Upload deployment package as artifact
-      - name: Upload deployment package
-        uses: actions/upload-artifact@v3
-        with:
-          name: deployment-package
-          path: tournament-organizer-deploy.zip
+    - uses: actions/checkout@v3
+    
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Extract metadata (tags, labels) for API
+      id: meta-api
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.API_IMAGE_NAME }}
+        tags: |
+          type=raw,value=latest
+          type=sha,format=short
+    
+    - name: Build and push API image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: TournamentOrganizer/Dockerfile
+        push: true
+        tags: ${{ steps.meta-api.outputs.tags }}
+        labels: ${{ steps.meta-api.outputs.labels }}
