@@ -1,4 +1,3 @@
-// lib/api.ts
 import axios from "axios";
 import type {
   Tournament,
@@ -9,33 +8,19 @@ import type {
   UpdateMatchScoreRequest,
 } from "@/types";
 
-// Get the API URL from environment variables with a fallback
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://tournamentorganizer.api:80/api";
-
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: "/api",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
-  // Since we're in development, we can disable SSL verification
-  // Remove this in production
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  httpsAgent: new (require("https").Agent)({
-    rejectUnauthorized: false,
-  }),
 });
-
-// Add request interceptor for Docker network handling
 api.interceptors.request.use((config) => {
-  // Log the request URL in development
   if (process.env.NODE_ENV === "development") {
     console.log("API Request URL:", `${config.baseURL}${config.url}`);
   }
   return config;
 });
-
 // Add response interceptor for better error handling
 api.interceptors.response.use(
   (response) => response,
