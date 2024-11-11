@@ -1,0 +1,62 @@
+name: Deploy to Ubuntu Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Wireguard
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wireguard
+
+      - name: Setup Wireguard configuration
+        env:
+          WIREGUARD_CONF: ${{ secrets.WIREGUARD_CONF }}
+        run: |
+          sudo mkdir -p /etc/wireguard
+          echo "$WIREGUARD_CONF" | sudo tee /etc/wireguard/wg0.conf > /dev/null
+          sudo chmod 600 /etc/wireguard/wg0.conf
+
+      - name: Connect to Wireguard
+        run: |
+          sudo wg-quick up wg0
+          # Wait for connection to establish
+          sleep 5
+          # Verify connection (optional)
+          sudo wg show
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          ssh $SERVER_USER@$SERVER_IP << 'EOF'
+            cd /path/to/your/repo
+            git pull origin main
+            docker compose pull
+            docker compose up -d --force-recreate
+            docker system prune -f
+          EOF
+
+      - name: Disconnect Wireguard
+        if: always()
+        run: |
+          sudo wg-quick down wg0
