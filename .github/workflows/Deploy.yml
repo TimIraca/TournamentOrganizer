@@ -53,6 +53,7 @@ jobs:
           ssh $SERVER_USER@$SERVER_IP << 'EOF'
             cd /home/webserver/TournamentOrganizer/TournamentOrganizer
             git pull origin main
+            export CLOUDFLARE_TOKEN=$CLOUDFLARE_TOKEN
             docker-compose down
             docker-compose rm -f
             docker-compose up -d --build

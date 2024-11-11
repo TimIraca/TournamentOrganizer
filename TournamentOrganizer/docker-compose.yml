@@ -55,7 +55,7 @@ services:
     network_mode: "host"
     command: tunnel run
     environment:
-      - TUNNEL_TOKEN=eyJhIjoiMDFhZTYzNjg5ODVlMDNlOGI3YjgzNGZiYjNkMWYzNzQiLCJ0IjoiNzc4MzE1NzUtZjMyZi00Y2YwLTlkOGItYjIzNWRjYzI0ZDZhIiwicyI6Ik1tSXdPR05sTkRRdE9XUTFaaTAwWlRoaExUaGxOMlF0WXpJeU5UZzJabUV3WkRRNCJ9
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}
   
 
 networks:
