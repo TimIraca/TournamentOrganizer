@@ -54,9 +54,6 @@ services:
     restart: unless-stopped
     network_mode: "host"
     command: tunnel run
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./config/hosts:/etc/hosts
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}
   
