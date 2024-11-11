@@ -63,7 +63,7 @@ services:
 
 networks:
   app-network:
-    driver: brisdge
+    driver: bridge
 
 volumes:
   sqldata:
