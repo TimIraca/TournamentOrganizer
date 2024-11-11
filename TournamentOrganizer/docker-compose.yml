@@ -58,12 +58,12 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./config/hosts:/etc/hosts
     environment:
-      - "TUNNEL_TOKEN=${{ secrets.CLOUDFLARE_TOKEN }}"
+      - TUNNEL_TOKEN=${CLOUDFLARE_TOKEN}
   
 
 networks:
   app-network:
-    driver: bridge
+    driver: brisdge
 
 volumes:
   sqldata:
