@@ -53,7 +53,7 @@ jobs:
           ssh $SERVER_USER@$SERVER_IP << 'EOF'
             cd /home/webserver/TournamentOrganizer/TournamentOrganizer
             git pull origin main
-            docker-compose down
+            docker-compose down -v
             docker-compose rm -f
             docker-compose up -d --build
           EOF

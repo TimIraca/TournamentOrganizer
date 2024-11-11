@@ -120,6 +120,19 @@ namespace TournamentOrganizer.DAL
                     PrizePool = 400m,
                     PrizeCurrency = "USD",
                 };
+                var completedTournament = new Tournament
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Last Month's Chess Tournament",
+                    Description = "Completed chess tournament from last month",
+                    Format = TournamentFormat.SingleElimination,
+                    Status = TournamentStatus.Completed,
+                    StartDate = DateTime.UtcNow.AddMonths(-1),
+                    EndDate = DateTime.UtcNow.AddMonths(-1).AddDays(2),
+                    MaxParticipants = 4,
+                    PrizePool = 400m,
+                    PrizeCurrency = "USD",
+                };
 
                 // Add prize distributions for completed tournament
                 completedTournament.PrizeDistributions.Add(
