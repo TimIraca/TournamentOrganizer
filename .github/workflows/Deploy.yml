@@ -52,9 +52,9 @@ jobs:
           ssh $SERVER_USER@$SERVER_IP << 'EOF'
             cd /home/webserver/TournamentOrganizer/TournamentOrganizer
             git pull origin main
-            docker compose pull
-            docker compose up -d --force-recreate
-            docker system prune -f
+            docker-compose down
+            docker-compose rm -f
+            docker compose up -d --build
           EOF
 
       - name: Disconnect Wireguard
