@@ -129,7 +129,7 @@ export function MainLayout() {
     participantId: string
   ) => {
     try {
-      await tournamentApi.removeParticipant(tournamentId, participantId);
+      await tournamentApi.removeParticipant(participantId);
       await fetchParticipants(tournamentId);
     } catch (err) {
       setError(handleApiError(err));
