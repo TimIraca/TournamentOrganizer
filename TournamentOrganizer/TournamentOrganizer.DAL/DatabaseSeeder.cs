@@ -120,7 +120,7 @@ namespace TournamentOrganizer.DAL
                     PrizePool = 400m,
                     PrizeCurrency = "USD",
                 };
-                var completedTournament = new Tournament
+                var completedTournament2 = new Tournament
                 {
                     Id = Guid.NewGuid(),
                     Name = "Last Month's Chess Tournament",
