@@ -74,10 +74,8 @@ export const tournamentApi = {
     return response.data;
   },
 
-  removeParticipant: async (tournamentId: string, participantId: string) => {
-    await api.delete(
-      `/Participant/${participantId}/tournament/${tournamentId}`
-    );
+  removeParticipant: async (participantId: string) => {
+    await api.delete(`/Participant/${participantId}`);
   },
 
   // Match endpoints
