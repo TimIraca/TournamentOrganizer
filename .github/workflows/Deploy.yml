@@ -50,7 +50,7 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
         run: |
           ssh $SERVER_USER@$SERVER_IP << 'EOF'
-            cd /path/to/your/repo
+            cd /home/webserver/TournamentOrganizer/TournamentOrganizer
             git pull origin main
             docker compose pull
             docker compose up -d --force-recreate
