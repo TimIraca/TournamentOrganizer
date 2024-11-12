@@ -1,10 +1,12 @@
 name: Deploy to Ubuntu Server
 
 on:
-  push:
-    branches:
-      - main
-
+  # Only run after CD workflow completes
+  workflow_run:
+    workflows: ["CI for ASP.NET Web API"]
+    types:
+      - completed
+    branches: [ main ]
 jobs:
   deploy:
     runs-on: ubuntu-latest

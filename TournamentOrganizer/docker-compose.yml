@@ -9,7 +9,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=db;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
+      - ConnectionStrings__DefaultConnection=Server=db;Database=TournamentDb;User=sa;Password=/run/secrets/SA_PASSWORD;TrustServerCertificate=True
     volumes:
       - ~/.aspnet/https:/https:ro
     depends_on:
@@ -36,7 +36,7 @@ services:
       - "1433:1433"
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrong!Passw0rd
+      - SA_PASSWORD=/run/secrets/SA_PASSWORD
       - MSSQL_PID=Express
     volumes:
       - sqldata:/var/opt/mssql
@@ -55,8 +55,12 @@ services:
     network_mode: "host"
     command: tunnel run
     environment:
-      - TUNNEL_TOKEN=eyJhIjoiMDFhZTYzNjg5ODVlMDNlOGI3YjgzNGZiYjNkMWYzNzQiLCJ0IjoiNzc4MzE1NzUtZjMyZi00Y2YwLTlkOGItYjIzNWRjYzI0ZDZhIiwicyI6Ik1tSXdPR05sTkRRdE9XUTFaaTAwWlRoaExUaGxOMlF0WXpJeU5UZzJabUV3WkRRNCJ9
-  
+      - TUNNEL_TOKEN=/run/secrets/TUNNEL_TOKEN
+secrets:
+  SA_PASSWORD:
+    file: ../../secrets/dbpassword.txt
+  TUNNEL_TOKEN:
+    file: ../../secrets/cloudflaretoken.txt
 
 networks:
   app-network:
