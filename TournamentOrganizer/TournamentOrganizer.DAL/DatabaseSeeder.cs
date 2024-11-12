@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TournamentOrganizer.DAL.Entities;
 
 namespace TournamentOrganizer.DAL
@@ -41,6 +41,18 @@ namespace TournamentOrganizer.DAL
                         StartDate = DateTime.UtcNow.AddDays(1),
                         MaxParticipants = 8,
                         PrizePool = 500m,
+                        PrizeCurrency = "USD",
+                    },
+                    new Tournament
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "League of Legends Round Robin",
+                        Description = "Monthly LoL tournament with round-robin format",
+                        Format = TournamentFormat.RoundRobin,
+                        Status = TournamentStatus.Registration,
+                        StartDate = DateTime.UtcNow.AddDays(14),
+                        MaxParticipants = 8,
+                        PrizePool = 2000m,
                         PrizeCurrency = "USD",
                     },
                     new Tournament
