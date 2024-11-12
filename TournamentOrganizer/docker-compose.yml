@@ -9,7 +9,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__DefaultConnection=Server=db;Database=TournamentDb;User=sa;Password=/run/secrets/SA_PASSWORD;TrustServerCertificate=True
+      - ConnectionStrings__DefaultConnection=Server=db;Database=TournamentDb;User=sa;Password=${db_password};TrustServerCertificate=True
     volumes:
       - ~/.aspnet/https:/https:ro
     depends_on:
@@ -36,35 +36,25 @@ services:
       - "1433:1433"
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=/run/secrets/SA_PASSWORD
+      - SA_PASSWORD=${db_password}
       - MSSQL_PID=Express
     volumes:
       - sqldata:/var/opt/mssql
     networks:
       - app-network
 
-# cloudflare tunnel
   cloudflare-tunnel:
     image: cloudflare/cloudflared
-    #build:
-    #  context: ./src
-    #  dockerfile: ./Dockerfile
     container_name: cloudflare-tunnel
     hostname: cloudflare-tunnel
     restart: unless-stopped
     network_mode: "host"
     command: tunnel run
     environment:
-      - TUNNEL_TOKEN=/run/secrets/TUNNEL_TOKEN
-secrets:
-  SA_PASSWORD:
-    file: ../../secrets/dbpassword.txt
-  TUNNEL_TOKEN:
-    file: ../../secrets/cloudflaretoken.txt
+      - TUNNEL_TOKEN=${cloudflare_token}
 
 networks:
   app-network:
     driver: bridge
-
 volumes:
   sqldata:
