@@ -1,3 +1,4 @@
+env_file: ../../secrets/.env
 services:
   tournamentorganizer.api:
     image: ${DOCKER_REGISTRY-}tournamentorganizerapi
