@@ -1,6 +1,6 @@
-env_file: ../../secrets/.env
 services:
   tournamentorganizer.api:
+    env_file: ../../secrets/.env
     image: ${DOCKER_REGISTRY-}tournamentorganizerapi
     build:
       context: .
@@ -32,6 +32,7 @@ services:
       - app-network
 
   db:
+    env_file: ../../secrets/.env
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
       - "1433:1433"
@@ -45,6 +46,7 @@ services:
       - app-network
 
   cloudflare-tunnel:
+    env_file: ../../secrets/.env
     image: cloudflare/cloudflared
     container_name: cloudflare-tunnel
     hostname: cloudflare-tunnel
