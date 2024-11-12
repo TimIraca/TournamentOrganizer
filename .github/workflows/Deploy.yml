@@ -57,7 +57,7 @@ jobs:
             git pull origin main
             docker compose down -v
             docker compose rm -f
-            docker compose up -d --build
+            docker compose up --env-file ../../secrets/.env -d --build
           EOF
 
       - name: Disconnect Wireguard
