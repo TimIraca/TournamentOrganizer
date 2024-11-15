@@ -116,9 +116,9 @@ export function MainLayout() {
 
   const handleCreateTournament = async (data: CreateTournamentRequest) => {
     try {
-      const newTournament = await tournamentApi.createTournament(data);
-      setTournaments((prev) => [...prev, newTournament]);
+      await tournamentApi.createTournament(data);
       setIsCreateDialogOpen(false);
+      fetchTournaments();
     } catch (err) {
       setError(handleApiError(err));
     }

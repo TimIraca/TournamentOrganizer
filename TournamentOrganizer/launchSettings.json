@@ -4,7 +4,10 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "tournamentorganizer.api": "StartDebugging"
+        "tournamentorganizer.api": "StartDebugging",
+        "cloudflare-tunnel": "DoNotStart",
+        "db": "StartWithoutDebugging",
+        "frontend": "StartWithoutDebugging"
       }
     }
   }

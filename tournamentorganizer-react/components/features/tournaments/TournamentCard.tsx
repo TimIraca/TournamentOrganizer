@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tournament } from "@/types";
-import { formatDate } from "@/lib/utils"; // We'll create this utility
+import { formatDate } from "@/lib/utils";
 
 interface TournamentCardProps {
   tournament: Tournament;
