@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using TournamentOrganizer.Core.DTOs;
@@ -23,27 +24,40 @@ namespace TournamentOrganizer.Core
 
             // Calculate tournament structure
             int totalParticipants = participantsList.Count;
-            int totalSlots = GetNextPowerOfTwo(totalParticipants);
+            int totalSlots = (int)BitOperations.RoundUpToPowerOf2((uint)totalParticipants);
             int numberOfByes = totalSlots - totalParticipants;
             int numberOfRounds = (int)Math.Log2(totalSlots);
 
             var rounds = new List<RoundCoreDto>();
             int matchNumber = 1;
 
-            // Round 1: Create matches for players who need to play in first round
-            var playersNeededInFirstRound = (totalParticipants - numberOfByes) & ~1;
-            var firstRoundPlayers = participantsList
-                .Skip(numberOfByes)
-                .Take(playersNeededInFirstRound)
-                .ToList();
-            var remainingPlayers = participantsList
-                .Skip(numberOfByes + playersNeededInFirstRound)
-                .ToList();
-            var byePlayers = participantsList.Take(numberOfByes).Concat(remainingPlayers).ToList();
-
-            if (firstRoundPlayers.Any())
+            int GetMatchesForRound(int roundNumber)
             {
-                var firstRoundMatches = new List<MatchCoreDto>();
+                if (roundNumber == 1)
+                {
+                    return (totalParticipants - numberOfByes) / 2;
+                }
+
+                return totalSlots / (int)Math.Pow(2, roundNumber);
+            }
+
+            // Round 1: Create matches for players who need to play in first round
+            int firstRoundMatches = GetMatchesForRound(1);
+            if (firstRoundMatches > 0)
+            {
+                var firstRoundPlayers = participantsList
+                    .Skip(numberOfByes)
+                    .Take(firstRoundMatches * 2)
+                    .ToList();
+                var remainingPlayers = participantsList
+                    .Skip(numberOfByes + firstRoundMatches * 2)
+                    .ToList();
+                var byePlayers = participantsList
+                    .Take(numberOfByes)
+                    .Concat(remainingPlayers)
+                    .ToList();
+
+                var round1Matches = new List<MatchCoreDto>();
                 for (int i = 0; i < firstRoundPlayers.Count; i += 2)
                 {
                     var match = new MatchCoreDto
@@ -53,7 +67,7 @@ namespace TournamentOrganizer.Core
                         Participant1Id = firstRoundPlayers[i].Id,
                         Participant2Id = firstRoundPlayers[i + 1].Id,
                     };
-                    firstRoundMatches.Add(match);
+                    round1Matches.Add(match);
                 }
 
                 rounds.Add(
@@ -62,26 +76,29 @@ namespace TournamentOrganizer.Core
                         Id = Guid.NewGuid(),
                         RoundNumber = 1,
                         TournamentId = tournamentId,
-                        Matches = firstRoundMatches,
+                        Matches = round1Matches,
                     }
                 );
+
+                // Update byePlayers list after first round allocation
             }
 
             // Round 2: Distribute bye players evenly
-            int round2MatchCount = totalSlots / 4;
-            var round2Matches = new List<MatchCoreDto>();
+            int round2Matches = GetMatchesForRound(2);
+            var round2MatchList = new List<MatchCoreDto>();
+            var byePlayersList = participantsList.Take(numberOfByes).ToList();
 
-            for (int i = 0; i < round2MatchCount; i++)
+            for (int i = 0; i < round2Matches; i++)
             {
                 var match = new MatchCoreDto { Id = Guid.NewGuid(), MatchNumber = matchNumber++ };
 
                 // Calculate if this match should receive bye players
                 int byePlayersForThisMatch = 0;
-                if (byePlayers.Count > 0)
+                if (byePlayersList.Count > 0)
                 {
                     // Distribute bye players evenly from right to left
-                    int remainingMatches = round2MatchCount - i;
-                    int remainingByes = byePlayers.Count;
+                    int remainingMatches = round2Matches - i;
+                    int remainingByes = byePlayersList.Count;
                     byePlayersForThisMatch = Math.Min(
                         2,
                         (remainingByes + remainingMatches - 1) / remainingMatches
@@ -90,17 +107,17 @@ namespace TournamentOrganizer.Core
 
                 if (byePlayersForThisMatch > 0)
                 {
-                    match.Participant1Id = byePlayers[0].Id;
-                    byePlayers.RemoveAt(0);
+                    match.Participant1Id = byePlayersList[0].Id;
+                    byePlayersList.RemoveAt(0);
 
-                    if (byePlayersForThisMatch > 1 && byePlayers.Any())
+                    if (byePlayersForThisMatch > 1 && byePlayersList.Any())
                     {
-                        match.Participant2Id = byePlayers[0].Id;
-                        byePlayers.RemoveAt(0);
+                        match.Participant2Id = byePlayersList[0].Id;
+                        byePlayersList.RemoveAt(0);
                     }
                 }
 
-                round2Matches.Add(match);
+                round2MatchList.Add(match);
             }
 
             rounds.Add(
@@ -109,15 +126,16 @@ namespace TournamentOrganizer.Core
                     Id = Guid.NewGuid(),
                     RoundNumber = 2,
                     TournamentId = tournamentId,
-                    Matches = round2Matches,
+                    Matches = round2MatchList,
                 }
             );
 
-            // Generate subsequent rounds
-            int matchesInRound = round2MatchCount / 2;
+            // Generate subsequent rounds using the matches formula from GetMatchesForRound
             for (int round = 3; round <= numberOfRounds; round++)
             {
+                int matchesInRound = GetMatchesForRound(round);
                 var matches = new List<MatchCoreDto>();
+
                 for (int i = 0; i < matchesInRound; i++)
                 {
                     matches.Add(
@@ -140,8 +158,6 @@ namespace TournamentOrganizer.Core
                         Matches = matches,
                     }
                 );
-
-                matchesInRound /= 2;
             }
 
             return rounds;
@@ -197,19 +213,6 @@ namespace TournamentOrganizer.Core
                 else if (targetMatch.Participant1Id == null)
                     targetMatch.Participant1Id = winnerId;
             }
-        }
-
-        private static int GetNextPowerOfTwo(int n)
-        {
-            if (n <= 1)
-                return 1;
-            n--;
-            n |= n >> 1;
-            n |= n >> 2;
-            n |= n >> 4;
-            n |= n >> 8;
-            n |= n >> 16;
-            return n + 1;
         }
     }
 }
