@@ -9,7 +9,7 @@ import {
 } from "@/types";
 
 const api = axios.create({
-  baseURL: "/api", // Replace with your actual API URL
+  baseURL: "/api",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
