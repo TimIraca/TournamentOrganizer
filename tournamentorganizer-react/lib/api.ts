@@ -1,15 +1,15 @@
 import axios from "axios";
-import type {
-  Tournament,
-  Participant,
+import {
   Match,
-  CreateTournamentRequest,
-  RegisterParticipantRequest,
-  UpdateMatchScoreRequest,
+  Participant,
+  Round,
+  type Tournament,
+  type TournamentOverview,
+  editTournament,
 } from "@/types";
 
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: "http://localhost:8080/api/", // Replace with your actual API URL
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -41,66 +41,87 @@ api.interceptors.response.use(
 export const tournamentApi = {
   // Tournament endpoints
   getAllTournaments: async () => {
-    const response = await api.get<Tournament[]>("/Tournament");
+    const response = await api.get<Tournament[]>("/Tournaments");
     return response.data;
   },
-
   getTournament: async (id: string) => {
-    const response = await api.get<Tournament>(`/Tournament/${id}`);
+    const response = await api.get<Tournament>(`Tournaments/${id}`);
     return response.data;
   },
-
-  createTournament: async (data: CreateTournamentRequest) => {
-    const response = await api.post<Tournament>("/Tournament", data);
-    return response.data;
+  updateTournament: async (id: string, tournament: editTournament) => {
+    await api.put(`/Tournaments/${id}`, tournament);
   },
-
-  // Participant endpoints
-  getParticipants: async (tournamentId: string) => {
-    const response = await api.get<Participant[]>(
-      `/Participant/tournament/${tournamentId}`
+  createTournament: async (tournament: editTournament) => {
+    await api.post("/Tournaments", tournament);
+  },
+  startTournament: async (id: string) => {
+    await api.post(`/Tournaments/${id}/start`);
+  },
+  resetTournament: async (id: string) => {
+    await api.post(`/Tournaments/${id}/reset`);
+  },
+  deleteTournament: async (id: string) => {
+    try {
+      const response = await api.delete(`/Tournaments/${id}`);
+      return;
+    } catch (error) {
+      throw error;
+    }
+  },
+  getTournamentOverview: async (id: string) => {
+    const response = await api.get<TournamentOverview>(
+      `/Overview/tournament/${id}`
     );
     return response.data;
   },
-
-  registerParticipant: async (
-    tournamentId: string,
-    data: RegisterParticipantRequest
-  ) => {
-    const response = await api.post<Participant>(
-      `/Participant/tournament/${tournamentId}`,
-      data
+  getRounds: async (tournamentId: string) => {
+    const response = await api.get<Round[]>(
+      `tournaments/${tournamentId}/rounds`
     );
     return response.data;
   },
-
-  removeParticipant: async (participantId: string) => {
-    await api.delete(`/Participant/${participantId}`);
-  },
-
-  // Match endpoints
-  getMatches: async (tournamentId: string) => {
+  getMatchesByRound: async (id: string, tournamentId: string) => {
     const response = await api.get<Match[]>(
-      `/Match/tournament/${tournamentId}`
+      `tournaments/${tournamentId}/matches/round/${id}`
     );
     return response.data;
   },
-
-  updateMatchScore: async (
+  declareMatchWinner: async (
     tournamentId: string,
-    matchId: string,
-    data: UpdateMatchScoreRequest
+    winnerId: string,
+    matchId: string
   ) => {
-    await api.put(`/Match/${matchId}/tournament/${tournamentId}/score`, data);
+    await api.post(`tournaments/${tournamentId}/matches/${matchId}/winner`, {
+      winnerId,
+    });
   },
 
-  // Tournament management
-  startTournament: async (tournamentId: string) => {
-    await api.post(`/Tournament/${tournamentId}/start`);
+  getParticipants: async (id: string) => {
+    const response = await api.get<Participant[]>(
+      `tournaments/${id}/participants`
+    );
+    return response.data;
   },
-
-  endTournament: async (tournamentId: string) => {
-    await api.post(`/Tournament/${tournamentId}/end`);
+  addParticipant: async (id: string, name: string) => {
+    const response = await api.post<Participant>(
+      `tournaments/${id}/participants`,
+      { name }
+    );
+    return response.data;
+  },
+  updateParticipant: async (
+    tournamentId: string,
+    participantId: string,
+    name: string
+  ) => {
+    await api.put(`tournaments/${tournamentId}/participants/${participantId}`, {
+      name,
+    });
+  },
+  deleteParticipant: async (tournamentId: string, participantId: string) => {
+    await api.delete(
+      `tournaments/${tournamentId}/participants/${participantId}`
+    );
   },
 };
 

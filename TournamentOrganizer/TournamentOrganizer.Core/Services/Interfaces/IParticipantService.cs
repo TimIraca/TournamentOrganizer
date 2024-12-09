@@ -9,10 +9,9 @@ namespace TournamentOrganizer.Core.Services.Interfaces
 {
     public interface IParticipantService
     {
-        Task<TournamentParticipantCoreDto> GetByIdAsync(Guid id);
-        Task<IEnumerable<TournamentParticipantCoreDto>> GetAllByTournamentIdAsync(Guid tournamentId);
-        Task AddAsync(TournamentParticipantCoreDto participantDto);
-        Task UpdateAsync(TournamentParticipantCoreDto participantDto);
-        Task DeleteAsync(Guid id);
+        Task<IEnumerable<ParticipantCoreDto>> GetParticipantsByTournamentIdAsync(Guid tournamentId);
+        Task<ParticipantCoreDto> AddParticipantAsync(ParticipantCoreDto participant);
+        Task UpdateParticipantAsync(ParticipantCoreDto participant);
+        Task DeleteParticipantAsync(Guid id);
     }
 }

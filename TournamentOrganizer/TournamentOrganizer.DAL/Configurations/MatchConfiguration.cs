@@ -8,13 +8,25 @@ namespace TournamentOrganizer.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Match> builder)
         {
-            builder.HasOne(m => m.Participant1)
-                .WithMany()
+            // Configure Participant1 relationship
+            builder
+                .HasOne(m => m.Participant1)
+                .WithMany(p => p.MatchesAsParticipant1)
                 .HasForeignKey(m => m.Participant1Id)
                 .OnDelete(DeleteBehavior.Restrict);
-            builder.HasOne(m => m.Participant2)
-                .WithMany()
+
+            // Configure Participant2 relationship
+            builder
+                .HasOne(m => m.Participant2)
+                .WithMany(p => p.MatchesAsParticipant2)
                 .HasForeignKey(m => m.Participant2Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Winner relationship (if needed)
+            builder
+                .HasOne(m => m.Winner)
+                .WithMany()
+                .HasForeignKey(m => m.WinnerId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
