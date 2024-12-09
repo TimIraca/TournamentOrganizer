@@ -20,7 +20,7 @@ services:
 
   frontend:
     build:
-      context: ../../frontendrewrite/tournamentorganizer-react
+      context: ../tournamentorganizer-react
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
