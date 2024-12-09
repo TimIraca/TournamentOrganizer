@@ -1,70 +1,86 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using TournamentOrganizer.api.DTOs.Requests;
-using TournamentOrganizer.api.DTOs.Responses;
+using TournamentOrganizer.api.DTOs;
 using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.Services.Interfaces;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TournamentOrganizer.api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class ParticipantController : ControllerBase
+    [Route("api/tournaments/{tournamentId}/participants")]
+    public class ParticipantsController : ControllerBase
     {
         private readonly IParticipantService _participantService;
         private readonly IMapper _mapper;
 
-        public ParticipantController(IParticipantService participantService, IMapper mapper)
+        public ParticipantsController(IParticipantService participantService, IMapper mapper)
         {
             _participantService = participantService;
             _mapper = mapper;
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<TournamentParticipantResponseApiDto>> GetById(Guid id)
+        // GET: api/tournaments/{tournamentId}/participants
+        [HttpGet]
+        public async Task<IActionResult> GetParticipantsByTournamentId(Guid tournamentId)
         {
-            var participantDto = await _participantService.GetByIdAsync(id);
-            if (participantDto == null)
-            {
-                return NotFound();
-            }
-
-            var response = _mapper.Map<TournamentParticipantResponseApiDto>(participantDto);
-            return Ok(response);
+            var coreDtos = await _participantService.GetParticipantsByTournamentIdAsync(
+                tournamentId
+            );
+            var apiDtos = _mapper.Map<IEnumerable<ParticipantApiDto>>(coreDtos);
+            return Ok(apiDtos);
         }
 
-        [HttpGet("tournament/{tournamentId}")]
-        public async Task<ActionResult<IEnumerable<TournamentParticipantResponseApiDto>>> GetAllByTournamentId(Guid tournamentId)
-        {
-            var participantsDto = await _participantService.GetAllByTournamentIdAsync(tournamentId);
-            var response = _mapper.Map<IEnumerable<TournamentParticipantResponseApiDto>>(participantsDto);
-            return Ok(response);
-        }
-
+        // POST: api/tournaments/{tournamentId}/participants
         [HttpPost]
-        public async Task<ActionResult> AddParticipant(TournamentParticipantRequestApiDto request)
+        [ProducesResponseType(typeof(ParticipantApiDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> AddParticipant(
+            Guid tournamentId,
+            [FromBody] CreateParticipantApiDto apiDto
+        )
         {
-            var participantDto = _mapper.Map<TournamentParticipantCoreDto>(request);
-            await _participantService.AddAsync(participantDto);
-            return Ok();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            ParticipantCoreDto coreDto = _mapper.Map<ParticipantCoreDto>(apiDto);
+            coreDto.TournamentId = tournamentId;
+
+            ParticipantCoreDto createdCoreParticipantDto =
+                await _participantService.AddParticipantAsync(coreDto);
+            ParticipantApiDto createdApiParticipantDto = _mapper.Map<ParticipantApiDto>(
+                createdCoreParticipantDto
+            );
+
+            return CreatedAtAction(
+                nameof(GetParticipantsByTournamentId),
+                new { tournamentId = createdApiParticipantDto.TournamentId },
+                createdApiParticipantDto
+            );
         }
 
+        // PUT: api/tournaments/{tournamentId}/participants/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateParticipant(Guid id, TournamentParticipantRequestApiDto request)
+        public async Task<IActionResult> UpdateParticipant(
+            Guid tournamentId,
+            Guid id,
+            [FromBody] CreateParticipantApiDto apiDto
+        )
         {
-            var participantDto = _mapper.Map<TournamentParticipantCoreDto>(request);
-            participantDto.Id = id;
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            await _participantService.UpdateAsync(participantDto);
+            ParticipantCoreDto coreDto = _mapper.Map<ParticipantCoreDto>(apiDto);
+            coreDto.TournamentId = tournamentId;
+            coreDto.Id = id;
+            await _participantService.UpdateParticipantAsync(coreDto);
             return NoContent();
         }
 
+        // DELETE: api/tournaments/{tournamentId}/participants/{id}
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteParticipant(Guid id)
+        public async Task<IActionResult> DeleteParticipant(Guid tournamentId, Guid id)
         {
-            await _participantService.DeleteAsync(id);
+            await _participantService.DeleteParticipantAsync(id);
             return NoContent();
         }
     }

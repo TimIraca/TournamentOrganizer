@@ -12,6 +12,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      sql-server:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: YourStrong!Passw0rd
+        ports:
+          - 1433:1433
+
     steps:
       # Checkout the repository
       - name: Checkout code
@@ -21,7 +30,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "8.0.x" # Adjust according to your .NET version
+          dotnet-version: "9.0.x" # Adjust according to your .NET version
 
       # Restore dependencies
       - name: Restore dependencies

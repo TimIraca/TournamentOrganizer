@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using TournamentOrganizer.Core.DTOs;
+using TournamentOrganizer.Core.DTOs.Overview;
 using TournamentOrganizer.DAL.Entities;
 
 namespace TournamentOrganizer.Core.Mappings
@@ -8,13 +9,13 @@ namespace TournamentOrganizer.Core.Mappings
     {
         public MappingProfile()
         {
-            CreateMap<Tournament, TournamentCoreDto>()
-                .ForMember(
-                    dest => dest.CurrentParticipants,
-                    opt => opt.MapFrom(src => src.Participants.Count)
-                )
-                .ReverseMap();
-            CreateMap<TournamentParticipant, TournamentParticipantCoreDto>().ReverseMap();
+            CreateMap<Tournament, TournamentCoreDto>().ReverseMap();
+            CreateMap<Participant, ParticipantCoreDto>().ReverseMap();
+            CreateMap<Round, RoundCoreDto>().ReverseMap();
+            CreateMap<Match, MatchCoreDto>().ReverseMap();
+            CreateMap<Participant, ParticipantOverviewDto>().ReverseMap();
+            CreateMap<Match, MatchOverviewDto>().ReverseMap();
+            CreateMap<Round, RoundOverviewDto>().ReverseMap();
         }
     }
 }

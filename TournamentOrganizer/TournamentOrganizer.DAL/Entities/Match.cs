@@ -9,18 +9,18 @@ namespace TournamentOrganizer.DAL.Entities
     public class Match
     {
         public Guid Id { get; set; }
-        public Guid TournamentId { get; set; }
-        public int Round { get; set; }
+        public int MatchNumber { get; set; }
+        public Guid RoundId { get; set; }
+
+        // Foreign Keys
         public Guid? Participant1Id { get; set; }
         public Guid? Participant2Id { get; set; }
-        public int? Participant1Score { get; set; }
-        public int? Participant2Score { get; set; }
-        public MatchStatus Status { get; set; }
         public Guid? WinnerId { get; set; }
-        public DateTime? ScheduledTime { get; set; }
 
-        public Tournament Tournament { get; set; }
-        public TournamentParticipant Participant1 { get; set; }
-        public TournamentParticipant Participant2 { get; set; }
+        // Navigation Properties
+        public Round Round { get; set; } = null!;
+        public Participant? Participant1 { get; set; }
+        public Participant? Participant2 { get; set; }
+        public Participant? Winner { get; set; }
     }
 }

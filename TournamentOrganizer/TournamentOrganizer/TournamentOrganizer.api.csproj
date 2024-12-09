@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>1a5af30d-9c50-4b06-b8ed-1f0f6b540798</UserSecretsId>
@@ -20,4 +20,7 @@
     <ProjectReference Include="..\TournamentOrganizer.DAL\TournamentOrganizer.DAL.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="TournamentOrganizer.api.IntegrationTests"/>
+	</ItemGroup>
 </Project>

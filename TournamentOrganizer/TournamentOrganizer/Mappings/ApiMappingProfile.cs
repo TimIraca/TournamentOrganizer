@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
-using TournamentOrganizer.api.DTOs.Requests;
-using TournamentOrganizer.api.DTOs.Responses;
+using TournamentOrganizer.api.DTOs;
 using TournamentOrganizer.Core.DTOs;
 
 namespace TournamentOrganizer.api.Mappings
@@ -9,14 +8,12 @@ namespace TournamentOrganizer.api.Mappings
     {
         public ApiMappingProfile()
         {
-            CreateMap<TournamentCoreDto, TournamentResponseApiDto>()
-                .ForMember(dest => dest.Format, opt => opt.MapFrom(src => src.Format.ToString()))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-                .ReverseMap();
-            CreateMap<TournamentCoreDto, TournamentRequestApiDto>().ReverseMap();
+            CreateMap<TournamentCoreDto, TournamentApiDto>().ReverseMap();
+            CreateMap<ParticipantCoreDto, ParticipantApiDto>().ReverseMap();
+            CreateMap<RoundCoreDto, RoundApiDto>().ReverseMap();
+            CreateMap<MatchCoreDto, MatchApiDto>().ReverseMap();
+            CreateMap<ParticipantCoreDto, CreateParticipantApiDto>().ReverseMap();
             CreateMap<TournamentCoreDto, CreateTournamentApiDto>().ReverseMap();
-            CreateMap<TournamentParticipantRequestApiDto, TournamentParticipantCoreDto>();
-            CreateMap<TournamentParticipantCoreDto, TournamentParticipantResponseApiDto>();
         }
     }
 }

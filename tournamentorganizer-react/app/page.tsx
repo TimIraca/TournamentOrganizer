@@ -1,5 +1,4 @@
-import { MainLayout } from "@/components/layout/MainLayout";
-
-export default function Home() {
-  return <MainLayout />;
+"use client";
+export default function Page() {
+  return <div></div>;
 }

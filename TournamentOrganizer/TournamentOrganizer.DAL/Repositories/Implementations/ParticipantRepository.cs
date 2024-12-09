@@ -13,55 +13,39 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<TournamentParticipant> GetByIdAsync(Guid id)
+        public async Task<Participant?> GetByIdAsync(Guid id)
         {
-            return await _context
-                .TournamentParticipants.Include(p => p.Tournament)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.Participants.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<IEnumerable<TournamentParticipant>> GetAllByTournamentIdAsync(
-            Guid tournamentId
-        )
+        public async Task<IEnumerable<Participant>> GetAllByTournamentIdAsync(Guid tournamentId)
         {
             return await _context
-                .TournamentParticipants.Where(p => p.TournamentId == tournamentId)
-                .Include(p => p.Tournament)
+                .Participants.Where(p => p.TournamentId == tournamentId)
                 .ToListAsync();
         }
 
-        public async Task AddAsync(TournamentParticipant participant)
+        public async Task<Participant> AddAsync(Participant participant)
         {
-            await _context.TournamentParticipants.AddAsync(participant);
+            await _context.Participants.AddAsync(participant);
             await _context.SaveChangesAsync();
+            return participant;
         }
 
-        public async Task UpdateAsync(TournamentParticipant participant)
+        public async Task UpdateAsync(Participant participant)
         {
-            _context.TournamentParticipants.Update(participant);
+            _context.Participants.Update(participant);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var participant = await _context.TournamentParticipants.FindAsync(id);
-            if (participant != null)
-            {
-                _context.TournamentParticipants.Remove(participant);
-                await _context.SaveChangesAsync();
-            }
-        }
+            var participant = await GetByIdAsync(id);
+            if (participant == null)
+                return;
 
-        public async Task<int> CountParticipantsAsync(Guid tournamentId)
-        {
-            return await _context.TournamentParticipants.CountAsync(p =>
-                p.TournamentId == tournamentId
-            );
-        }
-
-        public async Task<Tournament> GetTournamentAsync(Guid tournamentId)
-        {
-            return await _context.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId);
+            _context.Participants.Remove(participant);
+            await _context.SaveChangesAsync();
         }
     }
 }

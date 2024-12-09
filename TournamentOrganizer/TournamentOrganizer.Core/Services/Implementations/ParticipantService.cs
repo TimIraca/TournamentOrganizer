@@ -22,51 +22,28 @@ namespace TournamentOrganizer.Core.Services.Implementations
             _mapper = mapper;
         }
 
-        public async Task<TournamentParticipantCoreDto> GetByIdAsync(Guid id)
-        {
-            var participant = await _participantRepository.GetByIdAsync(id);
-            return participant != null
-                ? _mapper.Map<TournamentParticipantCoreDto>(participant)
-                : null;
-        }
-
-        public async Task<IEnumerable<TournamentParticipantCoreDto>> GetAllByTournamentIdAsync(
+        public async Task<IEnumerable<ParticipantCoreDto>> GetParticipantsByTournamentIdAsync(
             Guid tournamentId
         )
         {
             var participants = await _participantRepository.GetAllByTournamentIdAsync(tournamentId);
-            return _mapper.Map<IEnumerable<TournamentParticipantCoreDto>>(participants);
+            return _mapper.Map<IEnumerable<ParticipantCoreDto>>(participants);
         }
 
-        public async Task AddAsync(TournamentParticipantCoreDto participantDto)
+        public async Task<ParticipantCoreDto> AddParticipantAsync(ParticipantCoreDto participantDto)
         {
-            var currentCount = await _participantRepository.CountParticipantsAsync(
-                participantDto.TournamentId
-            );
-
-            var tournament = await _participantRepository.GetTournamentAsync(
-                participantDto.TournamentId
-            );
-            if (tournament == null)
-            {
-                throw new Exception("Tournament not found");
-            }
-
-            if (currentCount >= tournament.MaxParticipants)
-            {
-                throw new InvalidOperationException("Maximum number of participants reached.");
-            }
-            var participant = _mapper.Map<TournamentParticipant>(participantDto);
-            await _participantRepository.AddAsync(participant);
+            var participant = _mapper.Map<Participant>(participantDto);
+            Participant CreatedParticipant = await _participantRepository.AddAsync(participant);
+            return _mapper.Map<ParticipantCoreDto>(CreatedParticipant);
         }
 
-        public async Task UpdateAsync(TournamentParticipantCoreDto participantDto)
+        public async Task UpdateParticipantAsync(ParticipantCoreDto participantDto)
         {
-            var participant = _mapper.Map<TournamentParticipant>(participantDto);
+            var participant = _mapper.Map<Participant>(participantDto);
             await _participantRepository.UpdateAsync(participant);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteParticipantAsync(Guid id)
         {
             await _participantRepository.DeleteAsync(id);
         }
