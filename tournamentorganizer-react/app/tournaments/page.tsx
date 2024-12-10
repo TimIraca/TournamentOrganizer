@@ -2,8 +2,7 @@
 import { useState, useEffect } from "react";
 import { TournamentCard } from "@/components/Tournaments/TournamentCard";
 import { editTournament, Tournament } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Edit, PlusCircle, Trash } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -73,10 +72,7 @@ export default function Page() {
         <h1 className="text-3xl font-bold tracking-tight text-center flex-grow">
           Your Tournaments
         </h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          New Tournament
-        </Button>
+
         <CreateTournamentDialog onCreateTournament={handleCreateTournament} />
       </div>
 

@@ -16,6 +16,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 import { editTournament } from "@/types";
+import { PlusCircle } from "lucide-react";
 
 interface CreateTournamentDialogProps {
   onCreateTournament: (tournament: editTournament) => void;
@@ -57,7 +58,10 @@ export function CreateTournamentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Create New Tournament</Button>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          New Tournament
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
