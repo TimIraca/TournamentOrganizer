@@ -94,16 +94,37 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './tournamentorganizer-react/package-lock.json'
 
+      - name: Create Next.js CI config
+        working-directory: ./tournamentorganizer-react
+        run: |
+          cat << EOF > next.config.ci.js
+          /** @type {import('next').NextConfig} */
+          const nextConfig = {
+            async rewrites() {
+              return [
+                {
+                  source: "/api/:path*",
+                  destination: "http://localhost:8080/api/:path*",
+                },
+              ];
+            },
+          };
+          
+          module.exports = nextConfig;
+          EOF
       # Install frontend dependencies
       - name: Install frontend dependencies
         working-directory: ./tournamentorganizer-react
         run: |
           npm ci --force
+          cp next.config.ci.js next.config.js
           npm run build
 
       # Start the frontend in the background
       - name: Start frontend
         working-directory: ./tournamentorganizer-react
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8080/api
         run: |
           npm run start &
           echo "Waiting for frontend to start..."
