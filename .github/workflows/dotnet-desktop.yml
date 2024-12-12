@@ -20,7 +20,6 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      # Create simplified docker-compose for database only
       - name: Create Docker Compose file for database
         run: |
           cat << EOF > docker-compose.ci.yml
@@ -113,7 +112,7 @@ jobs:
       # Run Cypress tests
       - name: Run Cypress tests
         working-directory: ./tournamentorganizer-react
-        run: npm run cypress:run
+        run: npm run e2e:headless
 
       # Upload Cypress artifacts if tests fail
       - name: Upload Cypress artifacts
