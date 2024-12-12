@@ -20,92 +20,37 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      # Restore .NET dependencies
-      - name: Restore dependencies
-        run: dotnet restore ./TournamentOrganizer/TournamentOrganizer.sln
-
-      # Create .env file for Docker Compose
-      - name: Create .env file
+      # Create simplified docker-compose for database only
+      - name: Create Docker Compose file for database
         run: |
-          mkdir -p ../../secrets
-          cat << EOF > ../../secrets/.env
-          db_password=YourStrong!Passw0rd
-          DOCKER_REGISTRY=
-          EOF
-
-      # Create CI Dockerfile
-      - name: Create CI Dockerfile
-        run: |
-          cat << EOF > ./TournamentOrganizer/TournamentOrganizer/Dockerfile
-          FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-          USER app
-          WORKDIR /app
-          EXPOSE 80
-
-          FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-          ARG BUILD_CONFIGURATION=Release
-          WORKDIR /src
-
-          # Copy solution file
-          COPY ["TournamentOrganizer.sln", "."]
-
-          # Copy project files
-          COPY ../../TournamentOrganizer/TournamentOrganizer.api.csproj /src/TournamentOrganizer/
-          COPY ../../TournamentOrganizer.Core/TournamentOrganizer.Core.csproj /src/TournamentOrganizer.Core/
-          COPY ../../TournamentOrganizer.DAL/TournamentOrganizer.DAL.csproj /src/TournamentOrganizer.DAL/
-          # Restore packages
-          RUN dotnet restore "TournamentOrganizer/TournamentOrganizer.api.csproj"
-
-          # Copy everything else
-          COPY . .
-
-          # Build the application
-          WORKDIR "/src/TournamentOrganizer"
-          RUN dotnet build "TournamentOrganizer.api.csproj" -c \$BUILD_CONFIGURATION -o /app/build
-
-          FROM build AS publish
-          ARG BUILD_CONFIGURATION=Release
-          RUN dotnet publish "TournamentOrganizer.api.csproj" -c \$BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-          FROM base AS final
-          WORKDIR /app
-          COPY --from=publish /app/publish .
-          ENTRYPOINT ["dotnet", "TournamentOrganizer.api.dll"]
-          EOF
-
-      # Create Docker Compose override for CI
-      - name: Create Docker Compose override
-        run: |
-          cat << EOF > ./TournamentOrganizer/TournamentOrganizer/docker-compose.ci.yml
+          cat << EOF > docker-compose.ci.yml
           services:
             db:
+              image: mcr.microsoft.com/mssql/server:2022-latest
               environment:
                 - ACCEPT_EULA=Y
                 - SA_PASSWORD=YourStrong!Passw0rd
                 - MSSQL_PID=Express
-            tournamentorganizer.api:
-              build:
-                context: ./TournamentOrganizer
-                dockerfile: TournamentOrganizer/Dockerfile
-              environment:
-                - ASPNETCORE_ENVIRONMENT=Development
-                - ConnectionStrings__DefaultConnection=Server=db;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
-            frontend:
-              build:
-                context: ./tournamentorganizer-react
-                dockerfile: Dockerfile
-              environment:
-                - NEXT_PUBLIC_API_URL=/api
+              ports:
+                - "1433:1433"
           EOF
 
-      # Start only the database service
+      # Start the database
       - name: Start database
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml --env-file ../../secrets/.env up db -d
+          docker compose -f docker-compose.ci.yml up -d
           echo "Waiting for database to start..."
           sleep 15
 
-      # Run all .NET tests
+      # Restore .NET dependencies
+      - name: Restore dependencies
+        run: dotnet restore ./TournamentOrganizer/TournamentOrganizer.sln
+
+      # Build the solution
+      - name: Build solution
+        run: dotnet build ./TournamentOrganizer/TournamentOrganizer.sln --configuration Release --no-restore
+
+      # Run .NET tests
       - name: Run .NET tests
         run: |
           dotnet test ./TournamentOrganizer/TournamentOrganizer.sln \
@@ -114,14 +59,16 @@ jobs:
             --configuration Release \
             --environment ConnectionStrings__DefaultConnection="Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
 
-      # Start the remaining services
-      - name: Start remaining services
+      # Start the API in the background
+      - name: Start API
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml --env-file ../../secrets/.env up -d --build
-          echo "Waiting for services to start..."
-          sleep 30
+          dotnet run --project ./TournamentOrganizer/TournamentOrganizer/TournamentOrganizer.api.csproj \
+            --configuration Release \
+            --environment ConnectionStrings__DefaultConnection="Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True" &
+          echo "Waiting for API to start..."
+          sleep 10
 
-      # Setup Node.js for running Cypress
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -129,10 +76,20 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './tournamentorganizer-react/package-lock.json'
 
-      # Install Cypress and other frontend dependencies
+      # Install frontend dependencies
       - name: Install frontend dependencies
         working-directory: ./tournamentorganizer-react
-        run: npm ci
+        run: |
+          npm ci
+          npm run build
+
+      # Start the frontend in the background
+      - name: Start frontend
+        working-directory: ./tournamentorganizer-react
+        run: |
+          npm run start &
+          echo "Waiting for frontend to start..."
+          sleep 10
 
       # Run Cypress tests
       - name: Run Cypress tests
@@ -150,7 +107,10 @@ jobs:
             ./tournamentorganizer-react/cypress/videos
           retention-days: 7
 
-      # Stop Docker Compose services
+      # Cleanup
       - name: Stop services
         if: always()
-        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down
+        run: |
+          docker compose -f docker-compose.ci.yml down
+          pkill -f "dotnet run"
+          pkill -f "npm run start"
