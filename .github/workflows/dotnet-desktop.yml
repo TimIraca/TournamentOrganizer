@@ -33,7 +33,7 @@ jobs:
           DOCKER_REGISTRY=
           EOF
 
-      # Create CI-specific Dockerfile
+      # Create CI Dockerfile
       - name: Create CI Dockerfile
         run: |
           cat << EOF > ./TournamentOrganizer/TournamentOrganizer/Dockerfile
@@ -46,18 +46,19 @@ jobs:
           ARG BUILD_CONFIGURATION=Release
           WORKDIR /src
 
-          # Copy csproj files first and restore dependencies
-          COPY ["TournamentOrganizer.api.csproj", "TournamentOrganizer/"]
-          COPY ["../TournamentOrganizer.Core/TournamentOrganizer.Core.csproj", "TournamentOrganizer.Core/"]
-          COPY ["../TournamentOrganizer.DAL/TournamentOrganizer.DAL.csproj", "TournamentOrganizer.DAL/"]
+          # Copy solution file
+          COPY ["TournamentOrganizer.sln", "."]
+
+          # Copy project files
+          COPY ["TournamentOrganizer/TournamentOrganizer.api.csproj", "TournamentOrganizer/"]
+          COPY ["TournamentOrganizer.Core/TournamentOrganizer.Core.csproj", "TournamentOrganizer.Core/"]
+          COPY ["TournamentOrganizer.DAL/TournamentOrganizer.DAL.csproj", "TournamentOrganizer.DAL/"]
 
           # Restore packages
           RUN dotnet restore "TournamentOrganizer/TournamentOrganizer.api.csproj"
 
-          # Copy the rest of the source code
-          COPY . TournamentOrganizer/
-          COPY ../TournamentOrganizer.Core/. TournamentOrganizer.Core/
-          COPY ../TournamentOrganizer.DAL/. TournamentOrganizer.DAL/
+          # Copy everything else
+          COPY . .
 
           # Build the application
           WORKDIR "/src/TournamentOrganizer"
@@ -85,11 +86,11 @@ jobs:
                 - MSSQL_PID=Express
             tournamentorganizer.api:
               build:
-                context: ./TournamentOrganizer/TournamentOrganizer
-                dockerfile: Dockerfile
+                context: ./TournamentOrganizer
+                dockerfile: TournamentOrganizer/Dockerfile
               environment:
                 - ASPNETCORE_ENVIRONMENT=Development
-                - ConnectionStrings__DefaultConnection=Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
+                - ConnectionStrings__DefaultConnection=Server=db;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
             frontend:
               build:
                 context: ./tournamentorganizer-react
