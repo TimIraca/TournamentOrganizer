@@ -130,4 +130,27 @@ jobs:
           cache-dependency-path: './tournamentorganizer-react/package-lock.json'
 
       # Install Cypress and other frontend dependencies
-      - name: Instal
+      - name: Install frontend dependencies
+        working-directory: ./tournamentorganizer-react
+        run: npm ci
+
+      # Run Cypress tests
+      - name: Run Cypress tests
+        working-directory: ./tournamentorganizer-react
+        run: npm run cypress:run
+
+      # Upload Cypress artifacts if tests fail
+      - name: Upload Cypress artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-artifacts
+          path: |
+            ./tournamentorganizer-react/cypress/screenshots
+            ./tournamentorganizer-react/cypress/videos
+          retention-days: 7
+
+      # Stop Docker Compose services
+      - name: Stop services
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down
