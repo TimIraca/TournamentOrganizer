@@ -61,20 +61,26 @@ jobs:
             --configuration Release
 
       # Create appsettings.json for the API
-      - name: Create API settings
+      - name: Create Next.js CI config
+        working-directory: ./tournamentorganizer-react
         run: |
-          cat << EOF > ./TournamentOrganizer/TournamentOrganizer/appsettings.Development.json
-          {
-            "ConnectionStrings": {
-              "DefaultConnection": "${{ secrets.CONNECTION_STRING_CI }}"
+          cat << EOF > next.config.ci.js
+          /** @type {import('next').NextConfig} */
+          const nextConfig = {
+            eslint: {
+              dirs: ["app"],
             },
-            "Logging": {
-              "LogLevel": {
-                "Default": "Information",
-                "Microsoft.AspNetCore": "Warning"
-              }
-            }
-          }
+            async rewrites() {
+              return [
+                {
+                  source: "/api/:path*",
+                  destination: "http://localhost:8080/api/:path*",
+                },
+              ];
+            },
+          };
+          
+          module.exports = nextConfig;
           EOF
 
       # Start the API in the background
