@@ -44,10 +44,16 @@ jobs:
                 - SA_PASSWORD=YourStrong!Passw0rd
                 - MSSQL_PID=Express
             tournamentorganizer.api:
+              build:
+                context: .
+                dockerfile: TournamentOrganizer/TournamentOrganizer/Dockerfile
               environment:
                 - ASPNETCORE_ENVIRONMENT=Development
                 - ConnectionStrings__DefaultConnection=Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
             frontend:
+              build:
+                context: ./tournamentorganizer-react
+                dockerfile: Dockerfile
               environment:
                 - NEXT_PUBLIC_API_URL=/api
           EOF
@@ -59,7 +65,7 @@ jobs:
           echo "Waiting for database to start..."
           sleep 15
 
-      # Run all .NET tests (including integration tests)
+      # Run all .NET tests
       - name: Run .NET tests
         run: |
           dotnet test ./TournamentOrganizer/TournamentOrganizer.sln \
@@ -79,18 +85,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: "./TournamentOrganizer/frontend/package-lock.json"
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './tournamentorganizer-react/package-lock.json'
 
       # Install Cypress and other frontend dependencies
       - name: Install frontend dependencies
-        working-directory: ./TournamentOrganizer/frontend
+        working-directory: ./tournamentorganizer-react
         run: npm ci
 
       # Run Cypress tests
       - name: Run Cypress tests
-        working-directory: ./TournamentOrganizer/frontend
+        working-directory: ./tournamentorganizer-react
         run: npm run cypress:run
 
       # Upload Cypress artifacts if tests fail
@@ -100,8 +106,8 @@ jobs:
         with:
           name: cypress-artifacts
           path: |
-            ./TournamentOrganizer/frontend/cypress/screenshots
-            ./TournamentOrganizer/frontend/cypress/videos
+            ./tournamentorganizer-react/cypress/screenshots
+            ./tournamentorganizer-react/cypress/videos
           retention-days: 7
 
       # Stop Docker Compose services
