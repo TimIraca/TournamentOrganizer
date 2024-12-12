@@ -50,10 +50,9 @@ jobs:
           COPY ["TournamentOrganizer.sln", "."]
 
           # Copy project files
-          COPY ["TournamentOrganizer/TournamentOrganizer.api.csproj", "TournamentOrganizer/"]
-          COPY ["TournamentOrganizer.Core/TournamentOrganizer.Core.csproj", "TournamentOrganizer.Core/"]
-          COPY ["TournamentOrganizer.DAL/TournamentOrganizer.DAL.csproj", "TournamentOrganizer.DAL/"]
-
+          COPY ../../TournamentOrganizer/TournamentOrganizer.api.csproj /src/TournamentOrganizer/
+          COPY ../../TournamentOrganizer.Core/TournamentOrganizer.Core.csproj /src/TournamentOrganizer.Core/
+          COPY ../../TournamentOrganizer.DAL/TournamentOrganizer.DAL.csproj /src/TournamentOrganizer.DAL/
           # Restore packages
           RUN dotnet restore "TournamentOrganizer/TournamentOrganizer.api.csproj"
 
