@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    environment: Container
     steps:
       # Checkout the repository
       - name: Checkout code
@@ -28,7 +29,7 @@ jobs:
               image: mcr.microsoft.com/mssql/server:2022-latest
               environment:
                 - ACCEPT_EULA=Y
-                - SA_PASSWORD=YourStrong!Passw0rd
+                - SA_PASSWORD=${{ secrets.SQL_SA_PASSWORDS }}
                 - MSSQL_PID=Express
               ports:
                 - "1433:1433"
@@ -52,7 +53,7 @@ jobs:
       # Run .NET tests
       - name: Run .NET tests
         env:
-          ConnectionStrings__DefaultConnection: "Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+          ConnectionStrings__DefaultConnection: "${{ secrets.CONNECTION_STRING_CI }}"
         run: |
           dotnet test ./TournamentOrganizer/TournamentOrganizer.sln \
             --no-restore \
@@ -65,7 +66,7 @@ jobs:
           cat << EOF > ./TournamentOrganizer/TournamentOrganizer/appsettings.Development.json
           {
             "ConnectionStrings": {
-              "DefaultConnection": "Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+              "DefaultConnection": "${{ secrets.CONNECTION_STRING_CI }}"
             },
             "Logging": {
               "LogLevel": {
@@ -80,7 +81,7 @@ jobs:
       - name: Start API
         env:
           ASPNETCORE_ENVIRONMENT: "Development"
-          ConnectionStrings__DefaultConnection: "Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+          ConnectionStrings__DefaultConnection: "${{ secrets.CONNECTION_STRING_CI }}"
         run: |
           dotnet run --project ./TournamentOrganizer/TournamentOrganizer/TournamentOrganizer.api.csproj --launch-profile Development &
           echo "Waiting for API to start..."
@@ -101,6 +102,9 @@ jobs:
           /** @type {import('next').NextConfig} */
           const nextConfig = {
             async rewrites() {
+              eslint: {
+                dirs: ["app"],
+              },
               return [
                 {
                   source: "/api/:path*",
