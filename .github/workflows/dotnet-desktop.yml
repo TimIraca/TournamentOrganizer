@@ -44,7 +44,7 @@ jobs:
                 - SA_PASSWORD=YourStrong!Passw0rd
             tournamentorganizer.api:
               build:
-                context: .
+                context: ./TournamentOrganizer
                 dockerfile: TournamentOrganizer/TournamentOrganizer/Dockerfile
               environment:
                 - ASPNETCORE_ENVIRONMENT=Development
