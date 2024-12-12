@@ -76,7 +76,7 @@ jobs:
       # Create Docker Compose override for CI
       - name: Create Docker Compose override
         run: |
-          cat << EOF > ./TournamentOrganizer/docker-compose.ci.yml
+          cat << EOF > ./TournamentOrganizer/TournamentOrganizer/docker-compose.ci.yml
           services:
             db:
               environment:
