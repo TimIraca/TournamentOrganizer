@@ -79,8 +79,6 @@ namespace TournamentOrganizer.Core
                         Matches = round1Matches,
                     }
                 );
-
-                // Update byePlayers list after first round allocation
             }
 
             // Round 2: Distribute bye players evenly
