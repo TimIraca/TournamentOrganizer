@@ -101,7 +101,7 @@ jobs:
       # Start only the database service
       - name: Start database
         run: |
-          docker compose -f docker-compose.yml --env-file ../../secrets/.env up db -d
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml --env-file ../../secrets/.env up db -d
           echo "Waiting for database to start..."
           sleep 15
 
