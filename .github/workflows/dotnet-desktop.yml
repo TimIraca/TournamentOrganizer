@@ -52,19 +52,38 @@ jobs:
 
       # Run .NET tests
       - name: Run .NET tests
+        env:
+          ConnectionStrings__DefaultConnection: "Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
         run: |
           dotnet test ./TournamentOrganizer/TournamentOrganizer.sln \
             --no-restore \
             --verbosity normal \
-            --configuration Release \
-            --environment ConnectionStrings__DefaultConnection="Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+            --configuration Release
+
+      # Create appsettings.json for the API
+      - name: Create API settings
+        run: |
+          cat << EOF > ./TournamentOrganizer/TournamentOrganizer/appsettings.Development.json
+          {
+            "ConnectionStrings": {
+              "DefaultConnection": "Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+            },
+            "Logging": {
+              "LogLevel": {
+                "Default": "Information",
+                "Microsoft.AspNetCore": "Warning"
+              }
+            }
+          }
+          EOF
 
       # Start the API in the background
       - name: Start API
+        env:
+          ASPNETCORE_ENVIRONMENT: "Development"
+          ConnectionStrings__DefaultConnection: "Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
         run: |
-          dotnet run --project ./TournamentOrganizer/TournamentOrganizer/TournamentOrganizer.api.csproj \
-            --configuration Release \
-            --environment ConnectionStrings__DefaultConnection="Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True" &
+          dotnet run --project ./TournamentOrganizer/TournamentOrganizer/TournamentOrganizer.api.csproj --launch-profile Development &
           echo "Waiting for API to start..."
           sleep 10
 
@@ -80,7 +99,7 @@ jobs:
       - name: Install frontend dependencies
         working-directory: ./tournamentorganizer-react
         run: |
-          npm ci
+          npm ci --force
           npm run build
 
       # Start the frontend in the background
