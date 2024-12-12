@@ -42,8 +42,10 @@ jobs:
               environment:
                 - ACCEPT_EULA=Y
                 - SA_PASSWORD=YourStrong!Passw0rd
-                - MSSQL_PID=Express
             tournamentorganizer.api:
+              build:
+                context: .
+                dockerfile:
               environment:
                 - ASPNETCORE_ENVIRONMENT=Development
                 - ConnectionStrings__DefaultConnection=Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
