@@ -29,7 +29,7 @@ jobs:
               image: mcr.microsoft.com/mssql/server:2022-latest
               environment:
                 - ACCEPT_EULA=Y
-                - SA_PASSWORD=${{ secrets.SQL_SA_PASSWORDS }}
+                - SA_PASSWORD=${{ secrets.DB_PASSWORD_CI }}
                 - MSSQL_PID=Express
               ports:
                 - "1433:1433"
