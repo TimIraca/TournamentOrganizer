@@ -45,7 +45,7 @@ jobs:
             tournamentorganizer.api:
               build:
                 context: .
-                dockerfile:
+                dockerfile: TournamentOrganizer/Dockerfile
               environment:
                 - ASPNETCORE_ENVIRONMENT=Development
                 - ConnectionStrings__DefaultConnection=Server=localhost;Database=TournamentDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
