@@ -3,7 +3,7 @@ name: Deploy to Ubuntu Server
 on:
   # Only run after CD workflow completes
   workflow_run:
-    workflows: ["CI for ASP.NET Web API"]
+    workflows: ["CI for ASP.NET Web API and Next.js"]
     types:
       - completed
     branches: [ main ]
