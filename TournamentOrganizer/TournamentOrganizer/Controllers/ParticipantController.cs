@@ -23,10 +23,11 @@ namespace TournamentOrganizer.api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetParticipantsByTournamentId(Guid tournamentId)
         {
-            var coreDtos = await _participantService.GetParticipantsByTournamentIdAsync(
-                tournamentId
+            IEnumerable<ParticipantCoreDto> coreDtos =
+                await _participantService.GetParticipantsByTournamentIdAsync(tournamentId);
+            IEnumerable<ParticipantApiDto> apiDtos = _mapper.Map<IEnumerable<ParticipantApiDto>>(
+                coreDtos
             );
-            var apiDtos = _mapper.Map<IEnumerable<ParticipantApiDto>>(coreDtos);
             return Ok(apiDtos);
         }
 

@@ -21,8 +21,10 @@ public class TournamentsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllTournaments()
     {
-        var coreDtos = await _tournamentService.GetAllTournamentsAsync();
-        var apiDtos = _mapper.Map<IEnumerable<TournamentApiDto>>(coreDtos);
+        IEnumerable<TournamentCoreDto> coreDtos = await _tournamentService.GetAllTournamentsAsync();
+        IEnumerable<TournamentApiDto> apiDtos = _mapper.Map<IEnumerable<TournamentApiDto>>(
+            coreDtos
+        );
 
         return Ok(apiDtos);
     }
@@ -31,11 +33,11 @@ public class TournamentsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTournamentById(Guid id)
     {
-        var coreDto = await _tournamentService.GetTournamentByIdAsync(id);
+        TournamentCoreDto? coreDto = await _tournamentService.GetTournamentByIdAsync(id);
         if (coreDto == null)
             return NotFound();
 
-        var apiDto = _mapper.Map<TournamentApiDto>(coreDto);
+        TournamentApiDto apiDto = _mapper.Map<TournamentApiDto>(coreDto);
         return Ok(apiDto);
     }
 
@@ -45,13 +47,13 @@ public class TournamentsController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-        var coreDto = _mapper.Map<TournamentCoreDto>(apiDto);
+        TournamentCoreDto coreDto = _mapper.Map<TournamentCoreDto>(apiDto);
 
         // Add the tournament and get the generated ID
-        var createdCoreDto = await _tournamentService.AddTournamentAsync(coreDto);
+        TournamentCoreDto createdCoreDto = await _tournamentService.AddTournamentAsync(coreDto);
 
         // Map back to API DTO
-        var createdApiDto = _mapper.Map<TournamentApiDto>(createdCoreDto);
+        TournamentApiDto createdApiDto = _mapper.Map<TournamentApiDto>(createdCoreDto);
 
         return CreatedAtAction(
             nameof(GetTournamentById),
@@ -64,7 +66,7 @@ public class TournamentsController : ControllerBase
     [HttpPost("{id}/start")]
     public async Task<IActionResult> StartTournament(Guid id)
     {
-        var coreDto = await _tournamentService.GetTournamentByIdAsync(id);
+        TournamentCoreDto? coreDto = await _tournamentService.GetTournamentByIdAsync(id);
         if (coreDto == null)
             return NotFound();
 
@@ -83,7 +85,7 @@ public class TournamentsController : ControllerBase
             return BadRequest(ModelState);
         //if (id != apiDto.Id)
         //    return BadRequest("ID mismatch.");
-        var coreDto = _mapper.Map<TournamentCoreDto>(apiDto);
+        TournamentCoreDto coreDto = _mapper.Map<TournamentCoreDto>(apiDto);
         coreDto.Id = id;
         await _tournamentService.UpdateTournamentAsync(coreDto);
 

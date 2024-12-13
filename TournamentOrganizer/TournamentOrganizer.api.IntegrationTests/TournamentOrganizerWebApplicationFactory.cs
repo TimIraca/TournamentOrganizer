@@ -26,7 +26,7 @@ namespace TournamentOrganizer.api.IntegrationTests
                         "Server=localhost,1433;Database=TournamentDb_Test;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
                     );
                 });
-                var dbContext = CreateDbContext(services);
+                TournamentContext dbContext = CreateDbContext(services);
                 dbContext.Database.EnsureDeleted();
                 dbContext.Database.EnsureCreated();
             });
@@ -34,9 +34,9 @@ namespace TournamentOrganizer.api.IntegrationTests
 
         private static TournamentContext CreateDbContext(IServiceCollection services)
         {
-            var serviceProvider = services.BuildServiceProvider();
-            var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<TournamentContext>();
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+            IServiceScope scope = serviceProvider.CreateScope();
+            TournamentContext dbContext = scope.ServiceProvider.GetRequiredService<TournamentContext>();
             return dbContext;
         }
     }

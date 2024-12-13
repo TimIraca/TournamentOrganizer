@@ -25,8 +25,10 @@ namespace TournamentOrganizer.api.Controllers
         [HttpGet()]
         public async Task<IActionResult> GetRoundsByTournamentId(Guid tournamentId)
         {
-            var coreDtos = await _roundService.GetAllByTournamentIdAsync(tournamentId);
-            var apiDtos = _mapper.Map<IEnumerable<RoundApiDto>>(coreDtos);
+            IEnumerable<RoundCoreDto> coreDtos = await _roundService.GetAllByTournamentIdAsync(
+                tournamentId
+            );
+            IEnumerable<RoundApiDto> apiDtos = _mapper.Map<IEnumerable<RoundApiDto>>(coreDtos);
 
             return Ok(apiDtos);
         }
@@ -35,11 +37,11 @@ namespace TournamentOrganizer.api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRoundById(Guid id)
         {
-            var coreDto = await _roundService.GetByIdAsync(id);
+            RoundCoreDto? coreDto = await _roundService.GetByIdAsync(id);
             if (coreDto == null)
                 return NotFound();
 
-            var apiDto = _mapper.Map<RoundApiDto>(coreDto);
+            RoundApiDto apiDto = _mapper.Map<RoundApiDto>(coreDto);
             return Ok(apiDto);
         }
 
@@ -50,10 +52,10 @@ namespace TournamentOrganizer.api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var coreDto = _mapper.Map<RoundCoreDto>(apiDto);
-            var addedCoreDto = await _roundService.AddAsync(coreDto);
+            RoundCoreDto coreDto = _mapper.Map<RoundCoreDto>(apiDto);
+            RoundCoreDto addedCoreDto = await _roundService.AddAsync(coreDto);
 
-            var addedApiDto = _mapper.Map<RoundApiDto>(addedCoreDto);
+            RoundApiDto addedApiDto = _mapper.Map<RoundApiDto>(addedCoreDto);
             return CreatedAtAction(nameof(GetRoundById), new { id = addedApiDto.Id }, addedApiDto);
         }
 
@@ -66,7 +68,7 @@ namespace TournamentOrganizer.api.Controllers
             if (id != apiDto.Id)
                 return BadRequest("ID mismatch.");
 
-            var coreDto = _mapper.Map<RoundCoreDto>(apiDto);
+            RoundCoreDto coreDto = _mapper.Map<RoundCoreDto>(apiDto);
             await _roundService.UpdateAsync(coreDto);
 
             return NoContent();

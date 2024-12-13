@@ -40,7 +40,7 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task DeleteAsync(Guid id)
         {
-            var participant = await GetByIdAsync(id);
+            Participant? participant = await GetByIdAsync(id);
             if (participant == null)
                 return;
 

@@ -26,8 +26,10 @@ namespace TournamentOrganizer.api.Controllers
         {
             try
             {
-                var matches = await _matchService.GetAllByRoundIdAsync(roundId);
-                var apiDtos = _mapper.Map<IEnumerable<MatchApiDto>>(matches);
+                IEnumerable<MatchCoreDto> matches = await _matchService.GetAllByRoundIdAsync(
+                    roundId
+                );
+                IEnumerable<MatchApiDto> apiDtos = _mapper.Map<IEnumerable<MatchApiDto>>(matches);
                 return Ok(apiDtos);
             }
             catch (Exception ex)
@@ -41,8 +43,8 @@ namespace TournamentOrganizer.api.Controllers
         {
             try
             {
-                var match = await _matchService.GetByIdAsync(id);
-                var apiDto = _mapper.Map<MatchApiDto>(match);
+                MatchCoreDto? match = await _matchService.GetByIdAsync(id);
+                MatchApiDto apiDto = _mapper.Map<MatchApiDto>(match);
                 return Ok(apiDto);
             }
             catch (NotFoundException ex)
@@ -63,9 +65,9 @@ namespace TournamentOrganizer.api.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var coreDto = _mapper.Map<MatchCoreDto>(apiDto);
-                var addedMatch = await _matchService.AddAsync(coreDto);
-                var addedApiDto = _mapper.Map<MatchApiDto>(addedMatch);
+                MatchCoreDto coreDto = _mapper.Map<MatchCoreDto>(apiDto);
+                MatchCoreDto addedMatch = await _matchService.AddAsync(coreDto);
+                MatchApiDto addedApiDto = _mapper.Map<MatchApiDto>(addedMatch);
 
                 return CreatedAtAction(
                     nameof(GetMatchById),
@@ -90,7 +92,7 @@ namespace TournamentOrganizer.api.Controllers
                 if (id != apiDto.Id)
                     return BadRequest("ID mismatch between URL and body");
 
-                var coreDto = _mapper.Map<MatchCoreDto>(apiDto);
+                MatchCoreDto coreDto = _mapper.Map<MatchCoreDto>(apiDto);
                 await _matchService.UpdateAsync(coreDto);
                 return NoContent();
             }

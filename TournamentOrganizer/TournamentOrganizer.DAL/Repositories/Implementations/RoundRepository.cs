@@ -43,12 +43,13 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task UpdateAsync(Round round)
         {
-            foreach (var match in round.Matches)
+            foreach (Match match in round.Matches)
             {
-                var matchEntry = _context.Entry(match);
+                Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<Match> matchEntry =
+                    _context.Entry(match);
                 if (matchEntry.State == EntityState.Detached)
                 {
-                    var existingMatch = await _context.Matches.FindAsync(match.Id);
+                    Match? existingMatch = await _context.Matches.FindAsync(match.Id);
                     if (existingMatch != null)
                     {
                         // Only update if values are different
@@ -73,7 +74,7 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task DeleteAsync(Guid id)
         {
-            var round = await GetByIdAsync(id);
+            Round? round = await GetByIdAsync(id);
             if (round == null)
                 return;
 

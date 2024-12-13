@@ -30,20 +30,22 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task<IEnumerable<RoundCoreDto>> GetAllByTournamentIdAsync(Guid tournamentId)
         {
-            var rounds = await _roundRepository.GetAllByTournamentIdAsync(tournamentId);
+            IEnumerable<Round> rounds = await _roundRepository.GetAllByTournamentIdAsync(
+                tournamentId
+            );
             return _mapper.Map<IEnumerable<RoundCoreDto>>(rounds);
         }
 
         public async Task<RoundCoreDto> AddAsync(RoundCoreDto round)
         {
-            var roundEntity = _mapper.Map<Round>(round);
-            var addedRound = await _roundRepository.AddAsync(roundEntity);
+            Round roundEntity = _mapper.Map<Round>(round);
+            Round addedRound = await _roundRepository.AddAsync(roundEntity);
             return _mapper.Map<RoundCoreDto>(addedRound);
         }
 
         public async Task UpdateAsync(RoundCoreDto round)
         {
-            var roundEntity = _mapper.Map<Round>(round);
+            Round roundEntity = _mapper.Map<Round>(round);
             await _roundRepository.UpdateAsync(roundEntity);
         }
 

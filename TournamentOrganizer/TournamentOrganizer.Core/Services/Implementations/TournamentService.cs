@@ -33,13 +33,13 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task<TournamentCoreDto?> GetTournamentByIdAsync(Guid id)
         {
-            var tournament = await _tournamentRepository.GetByIdAsync(id);
+            Tournament? tournament = await _tournamentRepository.GetByIdAsync(id);
             return tournament == null ? null : _mapper.Map<TournamentCoreDto>(tournament);
         }
 
         public async Task<IEnumerable<TournamentCoreDto>> GetAllTournamentsAsync()
         {
-            var tournaments = await _tournamentRepository.GetAllAsync();
+            IEnumerable<Tournament> tournaments = await _tournamentRepository.GetAllAsync();
             return _mapper.Map<IEnumerable<TournamentCoreDto>>(tournaments);
         }
 
@@ -56,7 +56,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task UpdateTournamentAsync(TournamentCoreDto tournamentDto)
         {
-            var tournament = _mapper.Map<Tournament>(tournamentDto);
+            Tournament tournament = _mapper.Map<Tournament>(tournamentDto);
             await _tournamentRepository.UpdateAsync(tournament);
         }
 
@@ -67,7 +67,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task StartTournamentAsync(Guid id)
         {
-            var tournament =
+            Tournament tournament =
                 await _tournamentRepository.GetByIdAsync(id)
                 ?? throw new InvalidOperationException("Tournament not found");
 
@@ -79,21 +79,25 @@ namespace TournamentOrganizer.Core.Services.Implementations
             }
 
             // Check if tournament already has rounds
-            var existingRounds = await _roundRepository.GetAllByTournamentIdAsync(tournament.Id);
+            IEnumerable<Round> existingRounds = await _roundRepository.GetAllByTournamentIdAsync(
+                tournament.Id
+            );
             if (existingRounds.Any())
             {
                 throw new InvalidOperationException("Tournament already started.");
             }
 
             // Shuffle participants for randomness
-            var participants = tournament.Participants.OrderBy(_ => Guid.NewGuid()).ToList();
+            List<Participant> participants = tournament
+                .Participants.OrderBy(_ => Guid.NewGuid())
+                .ToList();
             List<ParticipantCoreDto> participantDtos = _mapper.Map<List<ParticipantCoreDto>>(
                 participants
             );
             List<RoundCoreDto> rounds = BracketGenerator
                 .GenerateBracket(participantDtos, tournament.Id)
                 .ToList();
-            foreach (var round in rounds)
+            foreach (RoundCoreDto round in rounds)
             {
                 await _roundRepository.AddAsync(_mapper.Map<Round>(round));
             }
@@ -109,7 +113,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
                 throw new ArgumentNullException(nameof(participants));
             }
 
-            var participantsList = participants.ToList();
+            List<ParticipantCoreDto> participantsList = participants.ToList();
             if (participantsList.Count == 0)
             {
                 throw new ArgumentException(
@@ -118,7 +122,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
                 );
             }
 
-            var rounds = new List<RoundCoreDto>();
+            List<RoundCoreDto> rounds = new List<RoundCoreDto>();
             int matchNumber = 1;
 
             // For 5 participants with 3 byes:
@@ -126,7 +130,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             // Last 2 participants play in first round (indexes 3-4)
 
             // Round 1: One match with the non-bye players
-            var round1Matches = new List<MatchCoreDto>
+            List<MatchCoreDto> round1Matches = new List<MatchCoreDto>
             {
                 new MatchCoreDto
                 {
@@ -151,7 +155,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             );
 
             // Round 2: Two matches
-            var round2Matches = new List<MatchCoreDto>
+            List<MatchCoreDto> round2Matches = new List<MatchCoreDto>
             {
                 // Match 2: Bye players 2 vs 3
                 new MatchCoreDto
@@ -187,7 +191,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             );
 
             // Round 3: Finals
-            var round3Matches = new List<MatchCoreDto>
+            List<MatchCoreDto> round3Matches = new List<MatchCoreDto>
             {
                 new MatchCoreDto
                 {
@@ -215,16 +219,18 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public void UpdateBracket(IEnumerable<RoundCoreDto> rounds, Guid winnerId, Guid matchId)
         {
-            var currentRound = rounds.FirstOrDefault(r => r.Matches.Any(m => m.Id == matchId));
+            RoundCoreDto? currentRound = rounds.FirstOrDefault(r =>
+                r.Matches.Any(m => m.Id == matchId)
+            );
             if (currentRound == null)
             {
                 return;
             }
 
-            var completedMatch = currentRound.Matches.First(m => m.Id == matchId);
+            MatchCoreDto completedMatch = currentRound.Matches.First(m => m.Id == matchId);
             completedMatch.WinnerId = winnerId;
 
-            var nextRound = rounds.FirstOrDefault(r =>
+            RoundCoreDto? nextRound = rounds.FirstOrDefault(r =>
                 r.RoundNumber == currentRound.RoundNumber + 1
             );
             if (nextRound == null)
@@ -235,13 +241,13 @@ namespace TournamentOrganizer.Core.Services.Implementations
             if (currentRound.RoundNumber == 1)
             {
                 // Winner of Match 1 goes to Match 3 (second match of round 2)
-                var nextMatch = nextRound.Matches.ElementAt(1);
+                MatchCoreDto nextMatch = nextRound.Matches.ElementAt(1);
                 nextMatch.Participant2Id = winnerId;
             }
             else if (currentRound.RoundNumber == 2)
             {
                 // Winners from Match 2 and 3 go to the finals
-                var finalMatch = nextRound.Matches.First();
+                MatchCoreDto finalMatch = nextRound.Matches.First();
 
                 if (completedMatch.MatchNumber == 2)
                 {
@@ -257,7 +263,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
         public async Task<TournamentOverviewDto?> GetTournamentOverviewAsync(Guid tournamentId)
         {
             // Fetch tournament data
-            var tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
+            Tournament? tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
             if (tournament == null)
             {
                 return null;

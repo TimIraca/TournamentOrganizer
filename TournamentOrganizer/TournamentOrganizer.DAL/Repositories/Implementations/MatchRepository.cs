@@ -46,7 +46,7 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task UpdateAsync(Match match)
         {
-            var existingMatch = await _context.Matches.FindAsync(match.Id);
+            Match? existingMatch = await _context.Matches.FindAsync(match.Id);
             if (existingMatch != null)
             {
                 existingMatch.WinnerId = match.WinnerId;
