@@ -27,9 +27,6 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
                     }
                 );
             }
-            List<RoundCoreDto> _rounds = BracketGenerator
-                .GenerateBracket(_fiveParticipants, _tournamentId)
-                .ToList();
         }
 
         [TestMethod]

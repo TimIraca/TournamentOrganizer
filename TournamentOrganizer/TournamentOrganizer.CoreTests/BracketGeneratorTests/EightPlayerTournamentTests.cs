@@ -24,9 +24,6 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
                     TournamentId = tournamentId,
                 })
                 .ToList();
-            List<RoundCoreDto> rounds = BracketGenerator
-                .GenerateBracket(participants, tournamentId)
-                .ToList();
         }
 
         [TestMethod]
