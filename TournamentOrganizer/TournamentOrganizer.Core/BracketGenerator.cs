@@ -15,7 +15,7 @@ namespace TournamentOrganizer.Core
             Guid tournamentId
         )
         {
-            var participantsList = participants.ToList();
+            List<ParticipantCoreDto> participantsList = participants.ToList();
             if (!participantsList.Any())
                 throw new ArgumentException(
                     "Must have at least one participant",
@@ -28,7 +28,7 @@ namespace TournamentOrganizer.Core
             int numberOfByes = totalSlots - totalParticipants;
             int numberOfRounds = (int)Math.Log2(totalSlots);
 
-            var rounds = new List<RoundCoreDto>();
+            List<RoundCoreDto> rounds = new List<RoundCoreDto>();
             int matchNumber = 1;
 
             int GetMatchesForRound(int roundNumber)
@@ -45,22 +45,22 @@ namespace TournamentOrganizer.Core
             int firstRoundMatches = GetMatchesForRound(1);
             if (firstRoundMatches > 0)
             {
-                var firstRoundPlayers = participantsList
+                List<ParticipantCoreDto> firstRoundPlayers = participantsList
                     .Skip(numberOfByes)
                     .Take(firstRoundMatches * 2)
                     .ToList();
-                var remainingPlayers = participantsList
+                List<ParticipantCoreDto> remainingPlayers = participantsList
                     .Skip(numberOfByes + firstRoundMatches * 2)
                     .ToList();
-                var byePlayers = participantsList
+                List<ParticipantCoreDto> byePlayers = participantsList
                     .Take(numberOfByes)
                     .Concat(remainingPlayers)
                     .ToList();
 
-                var round1Matches = new List<MatchCoreDto>();
+                List<MatchCoreDto> round1Matches = new List<MatchCoreDto>();
                 for (int i = 0; i < firstRoundPlayers.Count; i += 2)
                 {
-                    var match = new MatchCoreDto
+                    MatchCoreDto match = new MatchCoreDto
                     {
                         Id = Guid.NewGuid(),
                         MatchNumber = matchNumber++,
@@ -83,12 +83,16 @@ namespace TournamentOrganizer.Core
 
             // Round 2: Distribute bye players evenly
             int round2Matches = GetMatchesForRound(2);
-            var round2MatchList = new List<MatchCoreDto>();
-            var byePlayersList = participantsList.Take(numberOfByes).ToList();
+            List<MatchCoreDto> round2MatchList = new List<MatchCoreDto>();
+            List<ParticipantCoreDto> byePlayersList = participantsList.Take(numberOfByes).ToList();
 
             for (int i = 0; i < round2Matches; i++)
             {
-                var match = new MatchCoreDto { Id = Guid.NewGuid(), MatchNumber = matchNumber++ };
+                MatchCoreDto match = new MatchCoreDto
+                {
+                    Id = Guid.NewGuid(),
+                    MatchNumber = matchNumber++,
+                };
 
                 // Calculate if this match should receive bye players
                 int byePlayersForThisMatch = 0;
@@ -132,7 +136,7 @@ namespace TournamentOrganizer.Core
             for (int round = 3; round <= numberOfRounds; round++)
             {
                 int matchesInRound = GetMatchesForRound(round);
-                var matches = new List<MatchCoreDto>();
+                List<MatchCoreDto> matches = new List<MatchCoreDto>();
 
                 for (int i = 0; i < matchesInRound; i++)
                 {
@@ -167,12 +171,12 @@ namespace TournamentOrganizer.Core
             Guid matchId
         )
         {
-            var roundsList = rounds.ToList();
-            var currentRound = roundsList.First(r => r.Matches.Any(m => m.Id == matchId));
-            var completedMatch = currentRound.Matches.First(m => m.Id == matchId);
+            List<RoundCoreDto> roundsList = rounds.ToList();
+            RoundCoreDto currentRound = roundsList.First(r => r.Matches.Any(m => m.Id == matchId));
+            MatchCoreDto completedMatch = currentRound.Matches.First(m => m.Id == matchId);
             completedMatch.WinnerId = winnerId;
 
-            var nextRound = roundsList.FirstOrDefault(r =>
+            RoundCoreDto? nextRound = roundsList.FirstOrDefault(r =>
                 r.RoundNumber == currentRound.RoundNumber + 1
             );
             if (nextRound == null)
@@ -182,7 +186,7 @@ namespace TournamentOrganizer.Core
             int currentMatchIndex = currentRound.Matches.ToList().IndexOf(completedMatch);
             int nextRoundMatchIndex = currentMatchIndex / 2;
 
-            var targetMatch = nextRound.Matches.ElementAt(nextRoundMatchIndex);
+            MatchCoreDto? targetMatch = nextRound.Matches.ElementAt(nextRoundMatchIndex);
 
             // Check if the target match already has both participants filled
             // If so, find the next available match that can accept a winner

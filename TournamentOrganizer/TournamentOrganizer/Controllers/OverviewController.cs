@@ -18,7 +18,7 @@ namespace TournamentOrganizer.api.Controllers
         [HttpGet("tournament/{tournamentId}")]
         public async Task<IActionResult> GetTournamentOverview(Guid tournamentId)
         {
-            var overview = await _tournamentService.GetTournamentOverviewAsync(tournamentId);
+            Core.DTOs.Overview.TournamentOverviewDto? overview = await _tournamentService.GetTournamentOverviewAsync(tournamentId);
             if (overview == null)
                 return NotFound();
 

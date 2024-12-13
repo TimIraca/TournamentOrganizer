@@ -14,7 +14,7 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         [TestInitialize]
         public void Setup()
         {
-            var tournamentId = Guid.NewGuid();
+            Guid tournamentId = Guid.NewGuid();
         }
 
         [TestMethod]
@@ -27,11 +27,11 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         public void GenerateBracket_HasAtLeastOneRound(int participantCount)
         {
             // Arrange
-            var tournamentId = Guid.NewGuid();
-            var participants = CreateParticipants(participantCount, tournamentId);
+            Guid tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> participants = CreateParticipants(participantCount, tournamentId);
 
             // Act
-            var rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
+            List<RoundCoreDto> rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
 
             // Assert
             Assert.IsTrue(rounds.Count > 0, "Should generate at least one round");
@@ -47,11 +47,11 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         public void GenerateBracket_AllRoundsHaveMatches(int participantCount)
         {
             // Arrange
-            var tournamentId = Guid.NewGuid();
-            var participants = CreateParticipants(participantCount, tournamentId);
+            Guid tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> participants = CreateParticipants(participantCount, tournamentId);
 
             // Act
-            var rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
+            List<RoundCoreDto> rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
 
             // Assert
             Assert.IsTrue(
@@ -70,14 +70,14 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         public void GenerateBracket_IncludesAllParticipants(int participantCount)
         {
             // Arrange
-            var tournamentId = Guid.NewGuid();
-            var participants = CreateParticipants(participantCount, tournamentId);
+            Guid tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> participants = CreateParticipants(participantCount, tournamentId);
 
             // Act
-            var rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
+            List<RoundCoreDto> rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
 
             // Assert
-            var allParticipantIds = rounds
+            IEnumerable<Guid> allParticipantIds = rounds
                 .SelectMany(r => r.Matches)
                 .SelectMany(m => new[] { m.Participant1Id, m.Participant2Id })
                 .Where(id => id.HasValue)

@@ -7,7 +7,7 @@ using TournamentOrganizer.DAL;
 using TournamentOrganizer.DAL.Repositories.Implementations;
 using TournamentOrganizer.DAL.Repositories.Interfaces;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
@@ -45,14 +45,14 @@ builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<DatabaseSeeder>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddAutoMapper(typeof(ApiMappingProfile));
-var app = builder.Build();
-using (var scope = app.Services.CreateScope())
+WebApplication app = builder.Build();
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
+    IServiceProvider services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<TournamentContext>();
-        var logger = services.GetRequiredService<ILogger<Program>>();
+        TournamentContext context = services.GetRequiredService<TournamentContext>();
+        ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
 
         logger.LogInformation("Attempting to ensure database exists and is up to date");
 
@@ -70,11 +70,11 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
+        ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while setting up the database.");
         throw; // Rethrow to prevent application startup if database setup fails
     }
-    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     await seeder.SeedAsync();
 }
 

@@ -26,20 +26,21 @@ namespace TournamentOrganizer.Core.Services.Implementations
             Guid tournamentId
         )
         {
-            var participants = await _participantRepository.GetAllByTournamentIdAsync(tournamentId);
+            IEnumerable<Participant> participants =
+                await _participantRepository.GetAllByTournamentIdAsync(tournamentId);
             return _mapper.Map<IEnumerable<ParticipantCoreDto>>(participants);
         }
 
         public async Task<ParticipantCoreDto> AddParticipantAsync(ParticipantCoreDto participantDto)
         {
-            var participant = _mapper.Map<Participant>(participantDto);
+            Participant participant = _mapper.Map<Participant>(participantDto);
             Participant CreatedParticipant = await _participantRepository.AddAsync(participant);
             return _mapper.Map<ParticipantCoreDto>(CreatedParticipant);
         }
 
         public async Task UpdateParticipantAsync(ParticipantCoreDto participantDto)
         {
-            var participant = _mapper.Map<Participant>(participantDto);
+            Participant participant = _mapper.Map<Participant>(participantDto);
             await _participantRepository.UpdateAsync(participant);
         }
 

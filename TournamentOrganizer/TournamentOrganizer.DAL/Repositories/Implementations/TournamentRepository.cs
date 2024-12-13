@@ -21,7 +21,7 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task<Tournament?> GetByIdAsync(Guid id)
         {
-            var tourament = await _context // debug remove later
+            Tournament? tourament = await _context // debug remove later
                 .Tournaments.Include(t => t.Participants)
                 .Include(t => t.Rounds)
                 .ThenInclude(r => r.Matches)
@@ -51,7 +51,7 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task UpdateAsync(Tournament tournament)
         {
-            var existingTournament = await _context.Tournaments.FindAsync(tournament.Id);
+            Tournament? existingTournament = await _context.Tournaments.FindAsync(tournament.Id);
             if (existingTournament != null)
             {
                 // Update specific fields
@@ -65,7 +65,7 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task DeleteAsync(Guid id)
         {
-            var tournament = await GetByIdAsync(id);
+            Tournament? tournament = await GetByIdAsync(id);
             if (tournament == null)
                 return;
 

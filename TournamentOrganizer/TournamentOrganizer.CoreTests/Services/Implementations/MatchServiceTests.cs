@@ -34,15 +34,15 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task GetByIdAsync_WhenMatchExists_ReturnsMatchDto()
         {
             // Arrange
-            var matchId = Guid.NewGuid();
-            var match = new Match { Id = matchId, Participant1Id = Guid.NewGuid() };
-            var expectedDto = new MatchCoreDto { Id = matchId };
+            Guid matchId = Guid.NewGuid();
+            Match match = new Match { Id = matchId, Participant1Id = Guid.NewGuid() };
+            MatchCoreDto expectedDto = new MatchCoreDto { Id = matchId };
 
             _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync(match);
             _mockMapper.Setup(m => m.Map<MatchCoreDto>(match)).Returns(expectedDto);
 
             // Act
-            var result = await _service.GetByIdAsync(matchId);
+            MatchCoreDto result = await _service.GetByIdAsync(matchId);
 
             // Assert
             Assert.IsNotNull(result);
@@ -56,7 +56,7 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task GetByIdAsync_WhenMatchDoesNotExist_ThrowsNotFoundException()
         {
             // Arrange
-            var matchId = Guid.NewGuid();
+            Guid matchId = Guid.NewGuid();
             _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync((Match)null);
 
             // Act
@@ -69,19 +69,21 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task GetAllByRoundIdAsync_ReturnsMatchDtos()
         {
             // Arrange
-            var roundId = Guid.NewGuid();
-            var matches = new List<Match>
+            Guid roundId = Guid.NewGuid();
+            List<Match> matches = new List<Match>
             {
                 new Match { Id = Guid.NewGuid() },
                 new Match { Id = Guid.NewGuid() },
             };
-            var expectedDtos = matches.Select(m => new MatchCoreDto { Id = m.Id }).ToList();
+            List<MatchCoreDto> expectedDtos = matches
+                .Select(m => new MatchCoreDto { Id = m.Id })
+                .ToList();
 
             _mockMatchRepository.Setup(r => r.GetAllByRoundIdAsync(roundId)).ReturnsAsync(matches);
             _mockMapper.Setup(m => m.Map<IEnumerable<MatchCoreDto>>(matches)).Returns(expectedDtos);
 
             // Act
-            var result = await _service.GetAllByRoundIdAsync(roundId);
+            IEnumerable<MatchCoreDto> result = await _service.GetAllByRoundIdAsync(roundId);
 
             // Assert
             Assert.IsNotNull(result);
@@ -96,22 +98,22 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task AddAsync_ReturnsAddedMatchDto()
         {
             // Arrange
-            var inputDto = new MatchCoreDto
+            MatchCoreDto inputDto = new MatchCoreDto
             {
                 Id = Guid.NewGuid(),
                 Participant1Id = Guid.NewGuid(),
                 Participant2Id = Guid.NewGuid(),
             };
-            var matchEntity = new Match { Id = inputDto.Id };
-            var addedMatch = new Match { Id = inputDto.Id };
-            var expectedDto = new MatchCoreDto { Id = inputDto.Id };
+            Match matchEntity = new Match { Id = inputDto.Id };
+            Match addedMatch = new Match { Id = inputDto.Id };
+            MatchCoreDto expectedDto = new MatchCoreDto { Id = inputDto.Id };
 
             _mockMapper.Setup(m => m.Map<Match>(inputDto)).Returns(matchEntity);
             _mockMatchRepository.Setup(r => r.AddAsync(matchEntity)).ReturnsAsync(addedMatch);
             _mockMapper.Setup(m => m.Map<MatchCoreDto>(addedMatch)).Returns(expectedDto);
 
             // Act
-            var result = await _service.AddAsync(inputDto);
+            MatchCoreDto result = await _service.AddAsync(inputDto);
 
             // Assert
             Assert.IsNotNull(result);
@@ -123,10 +125,10 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task UpdateAsync_WhenMatchExists_UpdatesMatch()
         {
             // Arrange
-            var matchId = Guid.NewGuid();
-            var inputDto = new MatchCoreDto { Id = matchId };
-            var existingMatch = new Match { Id = matchId };
-            var matchEntity = new Match { Id = matchId };
+            Guid matchId = Guid.NewGuid();
+            MatchCoreDto inputDto = new MatchCoreDto { Id = matchId };
+            Match existingMatch = new Match { Id = matchId };
+            Match matchEntity = new Match { Id = matchId };
 
             _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync(existingMatch);
             _mockMapper.Setup(m => m.Map<Match>(inputDto)).Returns(matchEntity);
@@ -143,7 +145,7 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task UpdateAsync_WhenMatchDoesNotExist_ThrowsNotFoundException()
         {
             // Arrange
-            var inputDto = new MatchCoreDto { Id = Guid.NewGuid() };
+            MatchCoreDto inputDto = new MatchCoreDto { Id = Guid.NewGuid() };
             _mockMatchRepository.Setup(r => r.GetByIdAsync(inputDto.Id)).ReturnsAsync((Match)null);
 
             // Act
@@ -156,8 +158,8 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task DeleteAsync_WhenMatchExists_DeletesMatch()
         {
             // Arrange
-            var matchId = Guid.NewGuid();
-            var existingMatch = new Match { Id = matchId };
+            Guid matchId = Guid.NewGuid();
+            Match existingMatch = new Match { Id = matchId };
 
             _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync(existingMatch);
 
@@ -173,7 +175,7 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task DeleteAsync_WhenMatchDoesNotExist_ThrowsNotFoundException()
         {
             // Arrange
-            var matchId = Guid.NewGuid();
+            Guid matchId = Guid.NewGuid();
             _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync((Match)null);
 
             // Act
@@ -187,9 +189,9 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task DeclareMatchWinnerAsync_WhenNoRounds_ThrowsNotFoundException()
         {
             // Arrange
-            var tournamentId = Guid.NewGuid();
-            var matchId = Guid.NewGuid();
-            var winnerId = Guid.NewGuid();
+            Guid tournamentId = Guid.NewGuid();
+            Guid matchId = Guid.NewGuid();
+            Guid winnerId = Guid.NewGuid();
 
             _mockRoundRepository
                 .Setup(r => r.GetAllByTournamentIdAsync(tournamentId))
@@ -206,16 +208,16 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         public async Task DeclareMatchWinnerAsync_WhenWinnerNotInMatch_ThrowsInvalidOperationException()
         {
             // Arrange
-            var tournamentId = Guid.NewGuid();
-            var matchId = Guid.NewGuid();
-            var winnerId = Guid.NewGuid();
-            var match = new Match
+            Guid tournamentId = Guid.NewGuid();
+            Guid matchId = Guid.NewGuid();
+            Guid winnerId = Guid.NewGuid();
+            Match match = new Match
             {
                 Id = matchId,
                 Participant1Id = Guid.NewGuid(),
                 Participant2Id = Guid.NewGuid(),
             };
-            var rounds = new List<Round> { new Round { Id = Guid.NewGuid() } };
+            List<Round> rounds = new List<Round> { new Round { Id = Guid.NewGuid() } };
 
             _mockRoundRepository
                 .Setup(r => r.GetAllByTournamentIdAsync(tournamentId))

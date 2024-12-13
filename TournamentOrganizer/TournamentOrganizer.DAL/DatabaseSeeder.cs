@@ -21,7 +21,7 @@ namespace TournamentOrganizer.DAL
             }
 
             // Create completed tournament
-            var tournament = new Tournament
+            Tournament tournament = new Tournament
             {
                 Id = Guid.NewGuid(),
                 Name = "Completed Tournament",
@@ -40,7 +40,7 @@ namespace TournamentOrganizer.DAL
             };
 
             // Create rounds and matches
-            var round1 = new Round
+            Round round1 = new Round
             {
                 Id = Guid.NewGuid(),
                 RoundNumber = 1,
@@ -72,7 +72,7 @@ namespace TournamentOrganizer.DAL
                 },
             };
 
-            var round2 = new Round
+            Round round2 = new Round
             {
                 Id = Guid.NewGuid(),
                 RoundNumber = 2,
@@ -97,7 +97,7 @@ namespace TournamentOrganizer.DAL
             tournament.Rounds.Add(round1);
             tournament.Rounds.Add(round2);
 
-            var incompleteTournament = new Tournament
+            Tournament incompleteTournament = new Tournament
             {
                 Id = Guid.NewGuid(),
                 Name = "Incomplete Tournament",
@@ -120,7 +120,7 @@ namespace TournamentOrganizer.DAL
             };
 
             // Round 1
-            var round1incomplete = new Round
+            Round round1incomplete = new Round
             {
                 Id = Guid.NewGuid(),
                 RoundNumber = 1,
@@ -175,7 +175,7 @@ namespace TournamentOrganizer.DAL
             };
 
             // Round 2
-            var round2incomplete = new Round
+            Round round2incomplete = new Round
             {
                 Id = Guid.NewGuid(),
                 RoundNumber = 2,
@@ -207,7 +207,7 @@ namespace TournamentOrganizer.DAL
             };
 
             // Round 3
-            var round3 = new Round
+            Round round3 = new Round
             {
                 Id = Guid.NewGuid(),
                 RoundNumber = 3,
