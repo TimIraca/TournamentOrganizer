@@ -2,7 +2,7 @@ name: CI for ASP.NET Web API and Next.js
 on:
   push:
     branches:
-      - CypressEndToEndTests
+      - main
   pull_request:
     branches:
       - main
