@@ -89,6 +89,7 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: "Development"
           ConnectionStrings__DefaultConnection: "${{ secrets.CONNECTION_STRING_CI }}"
+          ASPNETCORE_URLS: "http://+:8080"
         run: |
           dotnet run --project ./TournamentOrganizer/TournamentOrganizer/TournamentOrganizer.api.csproj --launch-profile Development &
           echo "Waiting for API to start..."
