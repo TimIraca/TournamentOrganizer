@@ -115,7 +115,7 @@ jobs:
       - name: Start frontend
         working-directory: ./tournamentorganizer-react
         env:
-          NEXT_PUBLIC_API_URL: http://localhost:8080/api
+          NEXT_PUBLIC_API_URL: /api
         run: |
           npm run start &
           echo "Waiting for frontend to start..."
