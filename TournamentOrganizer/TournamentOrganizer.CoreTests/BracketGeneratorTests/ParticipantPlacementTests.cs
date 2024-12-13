@@ -11,35 +11,49 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
     [TestClass]
     public class ParticipantPlacementTests
     {
-        private Guid _tournamentId;
-        private List<ParticipantCoreDto> _fiveParticipants;
-        private List<RoundCoreDto> _rounds;
-
         [TestInitialize]
         public void Setup()
         {
-            _tournamentId = Guid.NewGuid();
-            _fiveParticipants = new List<ParticipantCoreDto>();
+            Guid tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> fiveParticipants = new List<ParticipantCoreDto>();
             for (int i = 1; i <= 5; i++)
             {
-                _fiveParticipants.Add(
+                fiveParticipants.Add(
                     new ParticipantCoreDto
                     {
                         Id = Guid.NewGuid(),
                         Name = $"Player {i}",
-                        TournamentId = _tournamentId,
+                        TournamentId = tournamentId,
                     }
                 );
             }
-            _rounds = BracketGenerator.GenerateBracket(_fiveParticipants, _tournamentId).ToList();
+            List<RoundCoreDto> rounds = BracketGenerator
+                .GenerateBracket(fiveParticipants, tournamentId)
+                .ToList();
         }
 
         [TestMethod]
         public void GenerateBracket_Round1_FirstParticipantIsPlayerFour()
         {
-            var round1Match = _rounds[0].Matches.First();
+            Guid tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> fiveParticipants = new List<ParticipantCoreDto>();
+            for (int i = 1; i <= 5; i++)
+            {
+                fiveParticipants.Add(
+                    new ParticipantCoreDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = $"Player {i}",
+                        TournamentId = tournamentId,
+                    }
+                );
+            }
+            List<RoundCoreDto> rounds = BracketGenerator
+                .GenerateBracket(fiveParticipants, tournamentId)
+                .ToList();
+            MatchCoreDto round1Match = rounds[0].Matches.First();
             Assert.AreEqual(
-                _fiveParticipants[3].Id,
+                fiveParticipants[3].Id,
                 round1Match.Participant1Id,
                 "Round 1 should have Player 4 in first position"
             );
@@ -48,9 +62,25 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         [TestMethod]
         public void GenerateBracket_Round1_SecondParticipantIsPlayerFive()
         {
-            var round1Match = _rounds[0].Matches.First();
+            Guid tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> fiveParticipants = new List<ParticipantCoreDto>();
+            for (int i = 1; i <= 5; i++)
+            {
+                fiveParticipants.Add(
+                    new ParticipantCoreDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = $"Player {i}",
+                        TournamentId = tournamentId,
+                    }
+                );
+            }
+            List<RoundCoreDto> rounds = BracketGenerator
+                .GenerateBracket(fiveParticipants, tournamentId)
+                .ToList();
+            MatchCoreDto round1Match = rounds[0].Matches.First();
             Assert.AreEqual(
-                _fiveParticipants[4].Id,
+                fiveParticipants[4].Id,
                 round1Match.Participant2Id,
                 "Round 1 should have Player 5 in second position"
             );
@@ -59,9 +89,25 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         [TestMethod]
         public void GenerateBracket_Round2_FirstMatchHasPlayerOneAndTwo()
         {
-            var round2Matches = _rounds[1].Matches.ToList();
+            Guid tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> fiveParticipants = new List<ParticipantCoreDto>();
+            for (int i = 1; i <= 5; i++)
+            {
+                fiveParticipants.Add(
+                    new ParticipantCoreDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = $"Player {i}",
+                        TournamentId = tournamentId,
+                    }
+                );
+            }
+            List<RoundCoreDto> rounds = BracketGenerator
+                .GenerateBracket(fiveParticipants, tournamentId)
+                .ToList();
+            List<MatchCoreDto> round2Matches = rounds[1].Matches.ToList();
             Assert.AreEqual(
-                _fiveParticipants[0].Id,
+                fiveParticipants[0].Id,
                 round2Matches[0].Participant1Id,
                 "First match of Round 2 should have Player 1 in first position"
             );
@@ -70,9 +116,25 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         [TestMethod]
         public void GenerateBracket_Round2_SecondMatchHasPlayerThree()
         {
-            var round2Matches = _rounds[1].Matches.ToList();
+            Guid tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> fiveParticipants = new List<ParticipantCoreDto>();
+            for (int i = 1; i <= 5; i++)
+            {
+                fiveParticipants.Add(
+                    new ParticipantCoreDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = $"Player {i}",
+                        TournamentId = tournamentId,
+                    }
+                );
+            }
+            List<RoundCoreDto> rounds = BracketGenerator
+                .GenerateBracket(fiveParticipants, tournamentId)
+                .ToList();
+            List<MatchCoreDto> round2Matches = rounds[1].Matches.ToList();
             Assert.AreEqual(
-                _fiveParticipants[2].Id,
+                fiveParticipants[2].Id,
                 round2Matches[1].Participant1Id,
                 "Second match of Round 2 should have Player 3 in first position"
             );

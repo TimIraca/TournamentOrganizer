@@ -11,15 +11,11 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
     [TestClass]
     public class BracketProgressionTests
     {
-        private Guid _tournamentId;
-        private List<ParticipantCoreDto> _fiveParticipants;
-        private List<RoundCoreDto> _rounds;
-
         [TestInitialize]
         public void Setup()
         {
-            _tournamentId = Guid.NewGuid();
-            _fiveParticipants = new List<ParticipantCoreDto>();
+            Guid _tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> _fiveParticipants = new List<ParticipantCoreDto>();
             for (int i = 1; i <= 5; i++)
             {
                 _fiveParticipants.Add(
@@ -31,20 +27,38 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
                     }
                 );
             }
-            _rounds = BracketGenerator.GenerateBracket(_fiveParticipants, _tournamentId).ToList();
+            List<RoundCoreDto> _rounds = BracketGenerator
+                .GenerateBracket(_fiveParticipants, _tournamentId)
+                .ToList();
         }
 
         [TestMethod]
         public void UpdateBracket_WhenPlayerFourWinsRound1_AdvancesToRound2()
         {
             // Arrange
-            var round1Match = _rounds[0].Matches.First();
+            Guid _tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> _fiveParticipants = new List<ParticipantCoreDto>();
+            for (int i = 1; i <= 5; i++)
+            {
+                _fiveParticipants.Add(
+                    new ParticipantCoreDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = $"Player {i}",
+                        TournamentId = _tournamentId,
+                    }
+                );
+            }
+            List<RoundCoreDto> _rounds = BracketGenerator
+                .GenerateBracket(_fiveParticipants, _tournamentId)
+                .ToList();
+            MatchCoreDto round1Match = _rounds[0].Matches.First();
 
             // Act
             BracketGenerator.UpdateBracket(_rounds, _fiveParticipants[3].Id, round1Match.Id);
 
             // Assert
-            var round2Matches = _rounds[1].Matches.ToList();
+            List<MatchCoreDto> round2Matches = _rounds[1].Matches.ToList();
             Assert.AreEqual(
                 _fiveParticipants[3].Id,
                 round2Matches[1].Participant2Id,
@@ -56,13 +70,29 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         public void UpdateBracket_WhenPlayerOneWinsRound2_AdvancesToFinals()
         {
             // Arrange
-            var round2Matches = _rounds[1].Matches.ToList();
+            Guid _tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> _fiveParticipants = new List<ParticipantCoreDto>();
+            for (int i = 1; i <= 5; i++)
+            {
+                _fiveParticipants.Add(
+                    new ParticipantCoreDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = $"Player {i}",
+                        TournamentId = _tournamentId,
+                    }
+                );
+            }
+            List<RoundCoreDto> _rounds = BracketGenerator
+                .GenerateBracket(_fiveParticipants, _tournamentId)
+                .ToList();
+            List<MatchCoreDto> round2Matches = _rounds[1].Matches.ToList();
 
             // Act
             BracketGenerator.UpdateBracket(_rounds, _fiveParticipants[0].Id, round2Matches[0].Id);
 
             // Assert
-            var finalMatch = _rounds[2].Matches.First();
+            MatchCoreDto finalMatch = _rounds[2].Matches.First();
             Assert.AreEqual(
                 _fiveParticipants[0].Id,
                 finalMatch.Participant1Id,
@@ -74,15 +104,31 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         public void UpdateBracket_WhenPlayerFourWinsSemifinal_AdvancesToFinals()
         {
             // Arrange
-            var round1Match = _rounds[0].Matches.First();
-            var round2Matches = _rounds[1].Matches.ToList();
+            Guid _tournamentId = Guid.NewGuid();
+            List<ParticipantCoreDto> _fiveParticipants = new List<ParticipantCoreDto>();
+            for (int i = 1; i <= 5; i++)
+            {
+                _fiveParticipants.Add(
+                    new ParticipantCoreDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = $"Player {i}",
+                        TournamentId = _tournamentId,
+                    }
+                );
+            }
+            List<RoundCoreDto> _rounds = BracketGenerator
+                .GenerateBracket(_fiveParticipants, _tournamentId)
+                .ToList();
+            MatchCoreDto round1Match = _rounds[0].Matches.First();
+            List<MatchCoreDto> round2Matches = _rounds[1].Matches.ToList();
             BracketGenerator.UpdateBracket(_rounds, _fiveParticipants[3].Id, round1Match.Id);
 
             // Act
             BracketGenerator.UpdateBracket(_rounds, _fiveParticipants[3].Id, round2Matches[1].Id);
 
             // Assert
-            var finalMatch = _rounds[2].Matches.First();
+            MatchCoreDto finalMatch = _rounds[2].Matches.First();
             Assert.AreEqual(
                 _fiveParticipants[3].Id,
                 finalMatch.Participant2Id,

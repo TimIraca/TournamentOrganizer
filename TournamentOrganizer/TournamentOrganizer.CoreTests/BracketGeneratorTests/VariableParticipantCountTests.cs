@@ -11,12 +11,10 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
     [TestClass]
     public class VariableParticipantCountTests
     {
-        private Guid _tournamentId;
-
         [TestInitialize]
         public void Setup()
         {
-            _tournamentId = Guid.NewGuid();
+            var tournamentId = Guid.NewGuid();
         }
 
         [TestMethod]
@@ -29,10 +27,11 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         public void GenerateBracket_HasAtLeastOneRound(int participantCount)
         {
             // Arrange
-            var participants = CreateParticipants(participantCount);
+            var tournamentId = Guid.NewGuid();
+            var participants = CreateParticipants(participantCount, tournamentId);
 
             // Act
-            var rounds = BracketGenerator.GenerateBracket(participants, _tournamentId).ToList();
+            var rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
 
             // Assert
             Assert.IsTrue(rounds.Count > 0, "Should generate at least one round");
@@ -48,10 +47,11 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         public void GenerateBracket_AllRoundsHaveMatches(int participantCount)
         {
             // Arrange
-            var participants = CreateParticipants(participantCount);
+            var tournamentId = Guid.NewGuid();
+            var participants = CreateParticipants(participantCount, tournamentId);
 
             // Act
-            var rounds = BracketGenerator.GenerateBracket(participants, _tournamentId).ToList();
+            var rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
 
             // Assert
             Assert.IsTrue(
@@ -70,10 +70,11 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
         public void GenerateBracket_IncludesAllParticipants(int participantCount)
         {
             // Arrange
-            var participants = CreateParticipants(participantCount);
+            var tournamentId = Guid.NewGuid();
+            var participants = CreateParticipants(participantCount, tournamentId);
 
             // Act
-            var rounds = BracketGenerator.GenerateBracket(participants, _tournamentId).ToList();
+            var rounds = BracketGenerator.GenerateBracket(participants, tournamentId).ToList();
 
             // Assert
             var allParticipantIds = rounds
@@ -90,7 +91,7 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
             );
         }
 
-        private List<ParticipantCoreDto> CreateParticipants(int count)
+        private List<ParticipantCoreDto> CreateParticipants(int count, Guid tournamentId)
         {
             return Enumerable
                 .Range(1, count)
@@ -98,7 +99,7 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
                 {
                     Id = Guid.NewGuid(),
                     Name = $"Player {i}",
-                    TournamentId = _tournamentId,
+                    TournamentId = tournamentId,
                 })
                 .ToList();
         }
