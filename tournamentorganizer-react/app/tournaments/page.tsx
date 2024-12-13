@@ -95,6 +95,7 @@ export default function Page() {
           {tournaments.map((tournament) => (
             <GeneralContextMenu
               key={tournament.id}
+              data-cy={tournament.id}
               actions={[
                 {
                   label: "Edit",
@@ -120,7 +121,10 @@ export default function Page() {
                 href={`/tournaments/${tournament.id}`}
                 className="block h-full"
               >
-                <TournamentCard tournament={tournament} />
+                <TournamentCard
+                  tournament={tournament}
+                  data-cy={tournament.id}
+                />
               </Link>
             </GeneralContextMenu>
           ))}

@@ -1,5 +1,4 @@
-name: CI for ASP.NET Web API
-
+name: CI for ASP.NET Web API and Next.js
 on:
   push:
     branches:
@@ -7,20 +6,10 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
-
-    services:
-      sql-server:
-        image: mcr.microsoft.com/mssql/server:2022-latest
-        env:
-          ACCEPT_EULA: Y
-          SA_PASSWORD: YourStrong!Passw0rd
-        ports:
-          - 1433:1433
-
+    environment: Container
     steps:
       # Checkout the repository
       - name: Checkout code
@@ -30,16 +19,128 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "9.0.x" # Adjust according to your .NET version
+          dotnet-version: "9.0.x"
 
-      # Restore dependencies
+      - name: Create Docker Compose file for database
+        run: |
+          cat << EOF > docker-compose.ci.yml
+          services:
+            db:
+              image: mcr.microsoft.com/mssql/server:2022-latest
+              environment:
+                - ACCEPT_EULA=Y
+                - SA_PASSWORD=${{ secrets.DB_PASSWORD_CI }}
+                - MSSQL_PID=Express
+              ports:
+                - "1433:1433"
+          EOF
+
+      # Start the database
+      - name: Start database
+        run: |
+          docker compose -f docker-compose.ci.yml up -d
+          echo "Waiting for database to start..."
+          sleep 15
+
+      # Restore .NET dependencies
       - name: Restore dependencies
         run: dotnet restore ./TournamentOrganizer/TournamentOrganizer.sln
 
       # Build the solution
-      - name: Build the solution
+      - name: Build solution
         run: dotnet build ./TournamentOrganizer/TournamentOrganizer.sln --configuration Release --no-restore
 
-      # Run tests
-      - name: Run tests
-        run: dotnet test ./TournamentOrganizer/TournamentOrganizer.sln --no-restore --verbosity normal --configuration Release
+      # Run .NET tests
+      - name: Run .NET tests
+        env:
+          ConnectionStrings__DefaultConnection: "${{ secrets.CONNECTION_STRING_CI }}"
+        run: |
+          dotnet test ./TournamentOrganizer/TournamentOrganizer.sln \
+            --no-restore \
+            --verbosity normal \
+            --configuration Release
+
+      # Create appsettings.json for the API
+      - name: Create Next.js CI config
+        working-directory: ./tournamentorganizer-react
+        run: |
+          cat << EOF > next.config.ci.js
+          /** @type {import('next').NextConfig} */
+          const nextConfig = {
+            eslint: {
+              dirs: ["app"],
+            },
+            async rewrites() {
+              return [
+                {
+                  source: "/api/:path*",
+                  destination: "http://localhost:8080/api/:path*",
+                },
+              ];
+            },
+          };
+          
+          module.exports = nextConfig;
+
+          EOF
+
+      # Start the API in the background
+      - name: Start API
+        env:
+          ASPNETCORE_ENVIRONMENT: "Development"
+          ConnectionStrings__DefaultConnection: "${{ secrets.CONNECTION_STRING_CI }}"
+          ASPNETCORE_URLS: "http://+:8080"
+        run: |
+          dotnet run --project ./TournamentOrganizer/TournamentOrganizer/TournamentOrganizer.api.csproj --launch-profile Development &
+          echo "Waiting for API to start..."
+          sleep 10
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './tournamentorganizer-react/package-lock.json'
+          
+      # Install frontend dependencies
+      - name: Install frontend dependencies
+        working-directory: ./tournamentorganizer-react
+        run: |
+          npm ci --force
+          cp next.config.ci.js next.config.js
+          npm run build
+
+      # Start the frontend in the background
+      - name: Start frontend
+        working-directory: ./tournamentorganizer-react
+        env:
+          NEXT_PUBLIC_API_URL: /api
+        run: |
+          npm run start &
+          echo "Waiting for frontend to start..."
+          sleep 10
+
+      # Run Cypress tests
+      - name: Run Cypress tests
+        working-directory: ./tournamentorganizer-react
+        run: npm run e2e:headless
+
+      # Upload Cypress artifacts if tests fail
+      - name: Upload Cypress artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-artifacts
+          path: |
+            ./tournamentorganizer-react/cypress/screenshots
+            ./tournamentorganizer-react/cypress/videos
+          retention-days: 7
+
+      # Cleanup
+      - name: Stop services
+        if: always()
+        run: |
+          docker compose -f docker-compose.ci.yml down
+          pkill -f "dotnet run"
+          pkill -f "npm run start"

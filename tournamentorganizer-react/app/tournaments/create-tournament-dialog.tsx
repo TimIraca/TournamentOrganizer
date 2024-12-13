@@ -58,7 +58,7 @@ export function CreateTournamentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button data-cy="create-tournament-button">
           <PlusCircle className="mr-2 h-4 w-4" />
           New Tournament
         </Button>

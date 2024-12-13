@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "cypress:open": "cypress open",
+    "e2e:headless": "cypress run --e2e"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -56,10 +58,12 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "cypress": "^13.16.1",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "eslint-plugin-storybook": "^0.11.0",
     "postcss": "^8",
+    "start-server-and-test": "^2.0.9",
     "storybook": "^8.4.3",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
