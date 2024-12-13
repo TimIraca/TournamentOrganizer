@@ -40,7 +40,9 @@ namespace TournamentOrganizer.api.Controllers
         )
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
+            }
 
             ParticipantCoreDto coreDto = _mapper.Map<ParticipantCoreDto>(apiDto);
             coreDto.TournamentId = tournamentId;
@@ -67,7 +69,9 @@ namespace TournamentOrganizer.api.Controllers
         )
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
+            }
 
             ParticipantCoreDto coreDto = _mapper.Map<ParticipantCoreDto>(apiDto);
             coreDto.TournamentId = tournamentId;
