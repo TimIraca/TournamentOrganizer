@@ -29,7 +29,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             _roundRepository = roundRepository;
         }
 
-        public async Task<MatchCoreDto> GetByIdAsync(Guid id)
+        public async Task<MatchCoreDto?> GetByIdAsync(Guid id)
         {
             Match? match = await _matchRepository.GetByIdAsync(id);
             if (match == null)
@@ -102,7 +102,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             List<RoundCoreDto> roundDtos = _mapper.Map<IEnumerable<RoundCoreDto>>(rounds).ToList();
             BracketGenerator.UpdateBracket(roundDtos, winnerId, matchId);
 
-            foreach (RoundCoreDto? round in roundDtos)
+            foreach (RoundCoreDto round in roundDtos)
             {
                 await _roundRepository.UpdateAsync(_mapper.Map<Round>(round));
             }

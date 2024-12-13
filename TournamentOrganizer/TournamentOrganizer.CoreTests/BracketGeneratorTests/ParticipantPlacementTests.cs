@@ -11,24 +11,6 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
     [TestClass]
     public class ParticipantPlacementTests
     {
-        [TestInitialize]
-        public void Setup()
-        {
-            Guid tournamentId = Guid.NewGuid();
-            List<ParticipantCoreDto> fiveParticipants = new List<ParticipantCoreDto>();
-            for (int i = 1; i <= 5; i++)
-            {
-                fiveParticipants.Add(
-                    new ParticipantCoreDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = $"Player {i}",
-                        TournamentId = tournamentId,
-                    }
-                );
-            }
-        }
-
         [TestMethod]
         public void GenerateBracket_Round1_FirstParticipantIsPlayerFour()
         {

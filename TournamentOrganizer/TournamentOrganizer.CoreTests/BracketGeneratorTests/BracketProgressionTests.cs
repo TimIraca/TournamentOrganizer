@@ -11,24 +11,6 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
     [TestClass]
     public class BracketProgressionTests
     {
-        [TestInitialize]
-        public void Setup()
-        {
-            Guid _tournamentId = Guid.NewGuid();
-            List<ParticipantCoreDto> _fiveParticipants = new List<ParticipantCoreDto>();
-            for (int i = 1; i <= 5; i++)
-            {
-                _fiveParticipants.Add(
-                    new ParticipantCoreDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = $"Player {i}",
-                        TournamentId = _tournamentId,
-                    }
-                );
-            }
-        }
-
         [TestMethod]
         public void UpdateBracket_WhenPlayerFourWinsRound1_AdvancesToRound2()
         {

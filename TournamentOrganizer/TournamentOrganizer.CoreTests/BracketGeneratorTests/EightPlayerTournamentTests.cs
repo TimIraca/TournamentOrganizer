@@ -11,21 +11,6 @@ namespace TournamentOrganizer.CoreTests.BracketGeneratorTests
     [TestClass]
     public class EightPlayerTournamentTests
     {
-        [TestInitialize]
-        public void Setup()
-        {
-            Guid tournamentId = Guid.NewGuid();
-            List<ParticipantCoreDto> participants = Enumerable
-                .Range(1, 8)
-                .Select(i => new ParticipantCoreDto
-                {
-                    Id = Guid.NewGuid(),
-                    Name = $"Player {i}",
-                    TournamentId = tournamentId,
-                })
-                .ToList();
-        }
-
         [TestMethod]
         public void GenerateBracket_HasThreeRounds()
         {
