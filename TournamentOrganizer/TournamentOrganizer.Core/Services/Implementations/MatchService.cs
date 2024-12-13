@@ -31,9 +31,11 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task<MatchCoreDto> GetByIdAsync(Guid id)
         {
-            var match = await _matchRepository.GetByIdAsync(id);
+            Match? match = await _matchRepository.GetByIdAsync(id);
             if (match == null)
+            {
                 throw new NotFoundException($"Match with ID {id} not found");
+            }
 
             return _mapper.Map<MatchCoreDto>(match);
         }
@@ -55,7 +57,9 @@ namespace TournamentOrganizer.Core.Services.Implementations
         {
             var existingMatch = await _matchRepository.GetByIdAsync(match.Id);
             if (existingMatch == null)
+            {
                 throw new NotFoundException($"Match with ID {match.Id} not found");
+            }
 
             var matchEntity = _mapper.Map<Match>(match);
             await _matchRepository.UpdateAsync(matchEntity);
@@ -65,7 +69,9 @@ namespace TournamentOrganizer.Core.Services.Implementations
         {
             var existingMatch = await _matchRepository.GetByIdAsync(id);
             if (existingMatch == null)
+            {
                 throw new NotFoundException($"Match with ID {id} not found");
+            }
 
             await _matchRepository.DeleteAsync(id);
         }
@@ -74,16 +80,22 @@ namespace TournamentOrganizer.Core.Services.Implementations
         {
             var rounds = await _roundRepository.GetAllByTournamentIdAsync(tournamentId);
             if (!rounds.Any())
+            {
                 throw new NotFoundException($"No rounds found for tournament {tournamentId}");
+            }
 
             var match = await _matchRepository.GetByIdAsync(matchId);
             if (match == null)
+            {
                 throw new NotFoundException($"Match with ID {matchId} not found");
+            }
 
             if (match.Participant1Id != winnerId && match.Participant2Id != winnerId)
+            {
                 throw new InvalidOperationException(
                     $"Player {winnerId} is not a participant in match {matchId}"
                 );
+            }
 
             var roundDtos = _mapper.Map<IEnumerable<RoundCoreDto>>(rounds).ToList();
             BracketGenerator.UpdateBracket(roundDtos, winnerId, matchId);

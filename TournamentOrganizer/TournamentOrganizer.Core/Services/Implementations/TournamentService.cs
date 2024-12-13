@@ -105,14 +105,18 @@ namespace TournamentOrganizer.Core.Services.Implementations
         )
         {
             if (participants == null)
+            {
                 throw new ArgumentNullException(nameof(participants));
+            }
 
             var participantsList = participants.ToList();
             if (participantsList.Count == 0)
+            {
                 throw new ArgumentException(
                     "Must have at least one participant",
                     nameof(participants)
                 );
+            }
 
             var rounds = new List<RoundCoreDto>();
             int matchNumber = 1;
@@ -213,7 +217,9 @@ namespace TournamentOrganizer.Core.Services.Implementations
         {
             var currentRound = rounds.FirstOrDefault(r => r.Matches.Any(m => m.Id == matchId));
             if (currentRound == null)
+            {
                 return;
+            }
 
             var completedMatch = currentRound.Matches.First(m => m.Id == matchId);
             completedMatch.WinnerId = winnerId;
@@ -222,7 +228,9 @@ namespace TournamentOrganizer.Core.Services.Implementations
                 r.RoundNumber == currentRound.RoundNumber + 1
             );
             if (nextRound == null)
+            {
                 return;
+            }
 
             if (currentRound.RoundNumber == 1)
             {
@@ -251,7 +259,9 @@ namespace TournamentOrganizer.Core.Services.Implementations
             // Fetch tournament data
             var tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
             if (tournament == null)
+            {
                 return null;
+            }
 
             // Build the DTO
             return new TournamentOverviewDto

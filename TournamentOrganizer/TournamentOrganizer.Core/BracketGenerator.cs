@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 using TournamentOrganizer.Core.DTOs;
 
 namespace TournamentOrganizer.Core
@@ -17,10 +12,12 @@ namespace TournamentOrganizer.Core
         {
             var participantsList = participants.ToList();
             if (!participantsList.Any())
+            {
                 throw new ArgumentException(
                     "Must have at least one participant",
                     nameof(participants)
                 );
+            }
 
             // Calculate tournament structure
             int totalParticipants = participantsList.Count;
@@ -176,7 +173,9 @@ namespace TournamentOrganizer.Core
                 r.RoundNumber == currentRound.RoundNumber + 1
             );
             if (nextRound == null)
+            {
                 return;
+            }
 
             // Calculate which match in the next round should receive this winner
             int currentMatchIndex = currentRound.Matches.ToList().IndexOf(completedMatch);
@@ -194,22 +193,32 @@ namespace TournamentOrganizer.Core
             }
 
             if (targetMatch == null)
+            {
                 return;
+            }
 
             // Determine correct slot based on current match number
             if (currentMatchIndex % 2 == 0)
             {
                 if (targetMatch.Participant1Id == null)
+                {
                     targetMatch.Participant1Id = winnerId;
+                }
                 else if (targetMatch.Participant2Id == null)
+                {
                     targetMatch.Participant2Id = winnerId;
+                }
             }
             else
             {
                 if (targetMatch.Participant2Id == null)
+                {
                     targetMatch.Participant2Id = winnerId;
+                }
                 else if (targetMatch.Participant1Id == null)
+                {
                     targetMatch.Participant1Id = winnerId;
+                }
             }
         }
     }
