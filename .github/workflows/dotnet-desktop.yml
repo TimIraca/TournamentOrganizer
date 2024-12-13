@@ -65,7 +65,7 @@ jobs:
         working-directory: ./tournamentorganizer-react
         run: |
           cat << EOF > next.config.ci.js
-          import type { NextConfig } from "next";
+          /** @type {import('next').NextConfig} */
           const nextConfig = {
             eslint: {
               dirs: ["app"],
@@ -81,6 +81,7 @@ jobs:
           };
           
           module.exports = nextConfig;
+
           EOF
 
       # Start the API in the background
