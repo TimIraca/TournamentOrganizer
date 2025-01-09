@@ -53,18 +53,9 @@ using (IServiceScope scope = app.Services.CreateScope())
     {
         TournamentContext context = services.GetRequiredService<TournamentContext>();
         ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
-
         logger.LogInformation("Attempting to ensure database exists and is up to date");
 
-        // This will create the database if it doesn't exist
-        context.Database.EnsureCreated();
-
-        // Apply any pending migrations
-        if (context.Database.GetPendingMigrations().Any())
-        {
-            logger.LogInformation("Applying pending migrations");
-            context.Database.Migrate();
-        }
+        context.Database.Migrate();
 
         logger.LogInformation("Database setup completed successfully");
     }
@@ -72,7 +63,7 @@ using (IServiceScope scope = app.Services.CreateScope())
     {
         ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while setting up the database.");
-        throw; // Rethrow to prevent application startup if database setup fails
+        throw;
     }
     DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     await seeder.SeedAsync();
