@@ -9,10 +9,10 @@ namespace TournamentOrganizer.DAL.Repositories.Interfaces
 {
     public interface ITournamentRepository
     {
-        Task<Tournament?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Tournament>> GetAllAsync();
+        Task<Tournament?> GetByIdAsync(Guid id, Guid userId);
+        Task<IEnumerable<Tournament>> GetAllAsync(Guid userId);
         Task<Tournament> AddAsync(Tournament tournament);
-        Task UpdateAsync(Tournament tournament);
-        Task DeleteAsync(Guid id);
+        Task UpdateAsync(Tournament tournament, Guid userId);
+        Task DeleteAsync(Guid id, Guid userId);
     }
 }

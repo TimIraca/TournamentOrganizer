@@ -31,22 +31,25 @@ namespace TournamentOrganizer.Core.Services.Implementations
             _participantRepository = participantRepository;
         }
 
-        public async Task<TournamentCoreDto?> GetTournamentByIdAsync(Guid id)
+        public async Task<TournamentCoreDto?> GetTournamentByIdAsync(Guid id, Guid userId)
         {
-            Tournament? tournament = await _tournamentRepository.GetByIdAsync(id);
+            Tournament? tournament = await _tournamentRepository.GetByIdAsync(id, userId);
             return tournament == null ? null : _mapper.Map<TournamentCoreDto>(tournament);
         }
 
-        public async Task<IEnumerable<TournamentCoreDto>> GetAllTournamentsAsync()
+        public async Task<IEnumerable<TournamentCoreDto>> GetAllTournamentsAsync(Guid userId)
         {
-            IEnumerable<Tournament> tournaments = await _tournamentRepository.GetAllAsync();
+            IEnumerable<Tournament> tournaments = await _tournamentRepository.GetAllAsync(userId);
             return _mapper.Map<IEnumerable<TournamentCoreDto>>(tournaments);
         }
 
-        public async Task<TournamentCoreDto> AddTournamentAsync(TournamentCoreDto tournamentDto)
+        public async Task<TournamentCoreDto> AddTournamentAsync(
+            TournamentCoreDto tournamentDto,
+            Guid userId
+        )
         {
             Tournament tournament = _mapper.Map<Tournament>(tournamentDto);
-
+            tournament.UserId = userId;
             // Add the tournament and get the created entity
             Tournament createdTournament = await _tournamentRepository.AddAsync(tournament);
 
@@ -54,21 +57,21 @@ namespace TournamentOrganizer.Core.Services.Implementations
             return _mapper.Map<TournamentCoreDto>(createdTournament);
         }
 
-        public async Task UpdateTournamentAsync(TournamentCoreDto tournamentDto)
+        public async Task UpdateTournamentAsync(TournamentCoreDto tournamentDto, Guid userId)
         {
             Tournament tournament = _mapper.Map<Tournament>(tournamentDto);
-            await _tournamentRepository.UpdateAsync(tournament);
+            await _tournamentRepository.UpdateAsync(tournament, userId);
         }
 
-        public async Task DeleteTournamentAsync(Guid id)
+        public async Task DeleteTournamentAsync(Guid id, Guid userId)
         {
-            await _tournamentRepository.DeleteAsync(id);
+            await _tournamentRepository.DeleteAsync(id, userId);
         }
 
-        public async Task StartTournamentAsync(Guid id)
+        public async Task StartTournamentAsync(Guid id, Guid userId)
         {
             Tournament tournament =
-                await _tournamentRepository.GetByIdAsync(id)
+                await _tournamentRepository.GetByIdAsync(id, userId)
                 ?? throw new InvalidOperationException("Tournament not found");
 
             if (tournament.Participants == null || tournament.Participants.Count < 3)
@@ -260,10 +263,13 @@ namespace TournamentOrganizer.Core.Services.Implementations
             }
         }
 
-        public async Task<TournamentOverviewDto?> GetTournamentOverviewAsync(Guid tournamentId)
+        public async Task<TournamentOverviewDto?> GetTournamentOverviewAsync(
+            Guid tournamentId,
+            Guid userId
+        )
         {
             // Fetch tournament data
-            Tournament? tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
+            Tournament? tournament = await _tournamentRepository.GetByIdAsync(tournamentId, userId);
             if (tournament == null)
             {
                 return null;

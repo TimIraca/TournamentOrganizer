@@ -22,6 +22,11 @@ namespace TournamentOrganizer.DAL.Configurations
                 .HasMany(t => t.Participants)
                 .WithOne(p => p.Tournament)
                 .HasForeignKey(p => p.TournamentId);
+            builder
+                .HasOne(t => t.User)
+                .WithMany(u => u.Tournaments)
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

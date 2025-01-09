@@ -42,7 +42,9 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
         {
             Participant? participant = await GetByIdAsync(id);
             if (participant == null)
+            {
                 return;
+            }
 
             _context.Participants.Remove(participant);
             await _context.SaveChangesAsync();

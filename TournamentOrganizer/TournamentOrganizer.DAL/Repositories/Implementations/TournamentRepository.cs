@@ -19,26 +19,22 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<Tournament?> GetByIdAsync(Guid id)
+        public async Task<Tournament?> GetByIdAsync(Guid id, Guid userId)
         {
-            Tournament? tourament = await _context // debug remove later
-                .Tournaments.Include(t => t.Participants)
-                .Include(t => t.Rounds)
-                .ThenInclude(r => r.Matches)
-                .FirstOrDefaultAsync(t => t.Id == id);
             return await _context
                 .Tournaments.Include(t => t.Participants)
                 .Include(t => t.Rounds)
                 .ThenInclude(r => r.Matches)
-                .FirstOrDefaultAsync(t => t.Id == id);
+                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
         }
 
-        public async Task<IEnumerable<Tournament>> GetAllAsync()
+        public async Task<IEnumerable<Tournament>> GetAllAsync(Guid userId)
         {
             return await _context
                 .Tournaments.Include(t => t.Participants)
                 .Include(t => t.Rounds)
                 .ThenInclude(r => r.Matches)
+                .Where(t => t.UserId == userId)
                 .ToListAsync();
         }
 
@@ -49,23 +45,28 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
             return tournament;
         }
 
-        public async Task UpdateAsync(Tournament tournament)
+        public async Task UpdateAsync(Tournament tournament, Guid userId)
         {
-            Tournament? existingTournament = await _context.Tournaments.FindAsync(tournament.Id);
+            Tournament? existingTournament = await _context.Tournaments.FirstOrDefaultAsync(t =>
+                t.Id == tournament.Id && t.UserId == userId
+            );
+
             if (existingTournament != null)
             {
                 // Update specific fields
                 existingTournament.Name = tournament.Name;
                 existingTournament.StartDate = tournament.StartDate;
-
                 // Save changes
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, Guid userId)
         {
-            Tournament? tournament = await GetByIdAsync(id);
+            Tournament? tournament = await _context.Tournaments.FirstOrDefaultAsync(t =>
+                t.Id == id && t.UserId == userId
+            );
+
             if (tournament == null)
                 return;
 

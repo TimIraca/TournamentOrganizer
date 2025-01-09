@@ -12,6 +12,7 @@ namespace TournamentOrganizer.DAL
         public DbSet<Participant> Participants { get; set; }
         public DbSet<Match> Matches { get; set; }
         public DbSet<Round> Rounds { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
