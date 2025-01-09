@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using TournamentOrganizer.DAL.Entities;
 
 namespace TournamentOrganizer.api.IntegrationTests
 {
@@ -23,7 +24,12 @@ namespace TournamentOrganizer.api.IntegrationTests
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var identity = new ClaimsIdentity(Array.Empty<Claim>(), "Test");
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, "test"),
+                new Claim(ClaimTypes.NameIdentifier, "2fd1c8d5-ba31-4dbf-9352-d6208fd89763"),
+            };
+            var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, "TestScheme");
 

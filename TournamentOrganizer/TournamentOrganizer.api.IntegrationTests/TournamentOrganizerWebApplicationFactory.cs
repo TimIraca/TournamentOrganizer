@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TournamentOrganizer.DAL;
+using TournamentOrganizer.DAL.Entities;
 
 namespace TournamentOrganizer.api.IntegrationTests
 {
@@ -37,6 +38,15 @@ namespace TournamentOrganizer.api.IntegrationTests
                 TournamentContext dbContext = CreateDbContext(services);
                 dbContext.Database.EnsureDeleted();
                 dbContext.Database.Migrate();
+                var testUser = new User
+                {
+                    Id = new Guid("2fd1c8d5-ba31-4dbf-9352-d6208fd89763"), // Must match the ID in TestAuthHandler
+                    Username = "test",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("test"),
+                };
+
+                dbContext.Users.Add(testUser);
+                dbContext.SaveChanges();
             });
         }
 
