@@ -28,7 +28,7 @@ namespace TournamentOrganizer.api.IntegrationTests
                 });
                 TournamentContext dbContext = CreateDbContext(services);
                 dbContext.Database.EnsureDeleted();
-                dbContext.Database.EnsureCreated();
+                dbContext.Database.Migrate();
             });
         }
 
@@ -36,7 +36,8 @@ namespace TournamentOrganizer.api.IntegrationTests
         {
             ServiceProvider serviceProvider = services.BuildServiceProvider();
             IServiceScope scope = serviceProvider.CreateScope();
-            TournamentContext dbContext = scope.ServiceProvider.GetRequiredService<TournamentContext>();
+            TournamentContext dbContext =
+                scope.ServiceProvider.GetRequiredService<TournamentContext>();
             return dbContext;
         }
     }
