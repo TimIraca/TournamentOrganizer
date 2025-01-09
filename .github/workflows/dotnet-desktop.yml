@@ -54,6 +54,7 @@ jobs:
       - name: Run .NET tests
         env:
           ConnectionStrings__DefaultConnection: "${{ secrets.CONNECTION_STRING_CI }}"
+          Jwt__Key: "${{ secrets.JWT_CI }}"
         run: |
           dotnet test ./TournamentOrganizer/TournamentOrganizer.sln \
             --no-restore \
