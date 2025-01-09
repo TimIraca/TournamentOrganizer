@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -26,6 +27,13 @@ namespace TournamentOrganizer.api.IntegrationTests
                         "Server=localhost,1433;Database=TournamentDb_Test;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
                     );
                 });
+                services
+                    .AddAuthentication("TestScheme")
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                        "TestScheme",
+                        options => { }
+                    );
+
                 TournamentContext dbContext = CreateDbContext(services);
                 dbContext.Database.EnsureDeleted();
                 dbContext.Database.Migrate();
