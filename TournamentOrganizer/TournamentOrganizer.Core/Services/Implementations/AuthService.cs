@@ -51,7 +51,9 @@ namespace TournamentOrganizer.Core.Services.Implementations
             var user = await _authRepository.GetUserByUsernameAsync(username);
 
             if (user == null)
+            {
                 return false;
+            }
 
             return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
         }
