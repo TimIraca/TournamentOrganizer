@@ -27,7 +27,7 @@ namespace TournamentOrganizer.api.IntegrationTests
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, "test"),
-                new Claim(ClaimTypes.NameIdentifier, "2fd1c8d5-ba31-4dbf-9352-d6208fd89763"),
+                new Claim("uid", "2fd1c8d5-ba31-4dbf-9352-d6208fd89763"),
             };
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
