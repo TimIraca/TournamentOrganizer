@@ -19,6 +19,14 @@ namespace TournamentOrganizer.DAL
                 Console.WriteLine("Database already seeded.");
                 return;
             }
+            var adminUser = new User
+            {
+                Id = Guid.NewGuid(),
+                Username = "admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
+            };
+            _context.Users.Add(adminUser);
+            await _context.SaveChangesAsync();
 
             // Create completed tournament
             Tournament tournament = new Tournament
@@ -27,6 +35,7 @@ namespace TournamentOrganizer.DAL
                 Name = "Completed Tournament",
                 StartDate = new DateTime(2024, 12, 1),
                 IsCompleted = true,
+                UserId = adminUser.Id,
                 Participants = new List<Participant>
                 {
                     new Participant { Id = Guid.NewGuid(), Name = "Player 1" },
@@ -103,6 +112,7 @@ namespace TournamentOrganizer.DAL
                 Name = "Incomplete Tournament",
                 StartDate = new DateTime(2024, 12, 6),
                 IsCompleted = false,
+                UserId = adminUser.Id,
                 Participants = new List<Participant>
                 {
                     new Participant { Id = Guid.NewGuid(), Name = "Player A" },

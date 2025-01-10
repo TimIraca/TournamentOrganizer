@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TournamentOrganizer.DAL;
 
@@ -11,9 +12,11 @@ using TournamentOrganizer.DAL;
 namespace TournamentOrganizer.DAL.Migrations
 {
     [DbContext(typeof(TournamentContext))]
-    partial class TournamentContextModelSnapshot : ModelSnapshot
+    [Migration("20250109201656_Users")]
+    partial class Users
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,12 +117,7 @@ namespace TournamentOrganizer.DAL.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Tournaments");
                 });
@@ -197,17 +195,6 @@ namespace TournamentOrganizer.DAL.Migrations
                     b.Navigation("Tournament");
                 });
 
-            modelBuilder.Entity("TournamentOrganizer.DAL.Entities.Tournament", b =>
-                {
-                    b.HasOne("TournamentOrganizer.DAL.Entities.User", "User")
-                        .WithMany("Tournaments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TournamentOrganizer.DAL.Entities.Participant", b =>
                 {
                     b.Navigation("MatchesAsParticipant1");
@@ -225,11 +212,6 @@ namespace TournamentOrganizer.DAL.Migrations
                     b.Navigation("Participants");
 
                     b.Navigation("Rounds");
-                });
-
-            modelBuilder.Entity("TournamentOrganizer.DAL.Entities.User", b =>
-                {
-                    b.Navigation("Tournaments");
                 });
 #pragma warning restore 612, 618
         }

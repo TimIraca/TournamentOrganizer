@@ -10,12 +10,12 @@ namespace TournamentOrganizer.Core.Services.Interfaces
 {
     public interface ITournamentService
     {
-        Task<TournamentCoreDto?> GetTournamentByIdAsync(Guid id);
-        Task<IEnumerable<TournamentCoreDto>> GetAllTournamentsAsync();
-        Task<TournamentCoreDto> AddTournamentAsync(TournamentCoreDto tournament);
-        Task UpdateTournamentAsync(TournamentCoreDto tournament);
-        Task DeleteTournamentAsync(Guid id);
-        Task<TournamentOverviewDto?> GetTournamentOverviewAsync(Guid tournamentId);
-        Task StartTournamentAsync(Guid tournamentId);
+        Task<TournamentCoreDto?> GetTournamentByIdAsync(Guid id, Guid userId);
+        Task<IEnumerable<TournamentCoreDto>> GetAllTournamentsAsync(Guid userId);
+        Task<TournamentCoreDto> AddTournamentAsync(TournamentCoreDto tournament, Guid userId);
+        Task UpdateTournamentAsync(TournamentCoreDto tournament, Guid userId);
+        Task DeleteTournamentAsync(Guid id, Guid userId);
+        Task<TournamentOverviewDto?> GetTournamentOverviewAsync(Guid tournamentId, Guid userId);
+        Task StartTournamentAsync(Guid tournamentId, Guid userId);
     }
 }

@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TournamentOrganizer.api.DTOs;
 using TournamentOrganizer.Core.DTOs;
@@ -6,6 +8,7 @@ using TournamentOrganizer.Core.Services.Interfaces;
 
 [ApiController]
 [Route("api/tournaments")]
+[Authorize]
 public class TournamentsController : ControllerBase
 {
     private readonly ITournamentService _tournamentService;
@@ -17,42 +20,57 @@ public class TournamentsController : ControllerBase
         _mapper = mapper;
     }
 
-    // GET: api/tournaments
+    private Guid GetCurrentUserId()
+    {
+        var userIdStr = User.FindFirst("uid")?.Value;
+        if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out Guid userId))
+        {
+            throw new UnauthorizedAccessException("User not properly authenticated");
+        }
+        return userId;
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAllTournaments()
     {
-        IEnumerable<TournamentCoreDto> coreDtos = await _tournamentService.GetAllTournamentsAsync();
+        var userId = GetCurrentUserId();
+        IEnumerable<TournamentCoreDto> coreDtos = await _tournamentService.GetAllTournamentsAsync(
+            userId
+        );
         IEnumerable<TournamentApiDto> apiDtos = _mapper.Map<IEnumerable<TournamentApiDto>>(
             coreDtos
         );
-
         return Ok(apiDtos);
     }
 
-    // GET: api/tournaments/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTournamentById(Guid id)
     {
-        TournamentCoreDto? coreDto = await _tournamentService.GetTournamentByIdAsync(id);
+        var userId = GetCurrentUserId();
+        TournamentCoreDto? coreDto = await _tournamentService.GetTournamentByIdAsync(id, userId);
         if (coreDto == null)
+        {
             return NotFound();
+        }
 
         TournamentApiDto apiDto = _mapper.Map<TournamentApiDto>(coreDto);
         return Ok(apiDto);
     }
 
-    // POST: api/tournaments
     [HttpPost]
     public async Task<IActionResult> CreateTournament([FromBody] CreateTournamentApiDto apiDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        var userId = GetCurrentUserId();
         TournamentCoreDto coreDto = _mapper.Map<TournamentCoreDto>(apiDto);
+        coreDto.UserId = userId;
 
-        // Add the tournament and get the generated ID
-        TournamentCoreDto createdCoreDto = await _tournamentService.AddTournamentAsync(coreDto);
-
-        // Map back to API DTO
+        TournamentCoreDto createdCoreDto = await _tournamentService.AddTournamentAsync(
+            coreDto,
+            userId
+        );
         TournamentApiDto createdApiDto = _mapper.Map<TournamentApiDto>(createdCoreDto);
 
         return CreatedAtAction(
@@ -62,19 +80,18 @@ public class TournamentsController : ControllerBase
         );
     }
 
-    // POST: api/tournaments/{id}/start
     [HttpPost("{id}/start")]
     public async Task<IActionResult> StartTournament(Guid id)
     {
-        TournamentCoreDto? coreDto = await _tournamentService.GetTournamentByIdAsync(id);
+        var userId = GetCurrentUserId();
+        TournamentCoreDto? coreDto = await _tournamentService.GetTournamentByIdAsync(id, userId);
         if (coreDto == null)
             return NotFound();
 
-        await _tournamentService.StartTournamentAsync(id);
+        await _tournamentService.StartTournamentAsync(id, userId);
         return Ok();
     }
 
-    // PUT: api/tournaments/{id}
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTournament(
         Guid id,
@@ -83,20 +100,21 @@ public class TournamentsController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-        //if (id != apiDto.Id)
-        //    return BadRequest("ID mismatch.");
+
+        var userId = GetCurrentUserId();
         TournamentCoreDto coreDto = _mapper.Map<TournamentCoreDto>(apiDto);
         coreDto.Id = id;
-        await _tournamentService.UpdateTournamentAsync(coreDto);
+        coreDto.UserId = userId;
 
+        await _tournamentService.UpdateTournamentAsync(coreDto, userId);
         return NoContent();
     }
 
-    // DELETE: api/tournaments/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTournament(Guid id)
     {
-        await _tournamentService.DeleteTournamentAsync(id);
+        var userId = GetCurrentUserId();
+        await _tournamentService.DeleteTournamentAsync(id, userId);
         return NoContent();
     }
 }

@@ -13,6 +13,7 @@ namespace TournamentOrganizer.Core.DTOs
         public string Name { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public bool IsCompleted { get; set; }
+        public Guid UserId { get; set; }
         public IEnumerable<ParticipantCoreDto> Participants { get; set; } =
             new List<ParticipantCoreDto>();
         public IEnumerable<RoundCoreDto> Rounds { get; set; } = new List<RoundCoreDto>();

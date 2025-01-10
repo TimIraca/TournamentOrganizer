@@ -16,6 +16,9 @@ namespace TournamentOrganizer.DAL.Entities
         public DateTime EndDate { get; set; }
         public bool IsCompleted { get; set; }
 
+        public Guid UserId { get; set; }
+        public User User { get; set; } = null!;
+
         // Navigation Properties
         public ICollection<Participant> Participants { get; set; } = new List<Participant>();
         public ICollection<Round> Rounds { get; set; } = new List<Round>();
