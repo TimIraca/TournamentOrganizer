@@ -16,6 +16,11 @@ const api = axios.create({
   },
 });
 api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
   if (process.env.NODE_ENV === "development") {
     console.log("API Request URL:", `${config.baseURL}${config.url}`);
   }
@@ -25,6 +30,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Handle unauthorized errors (invalid or expired token)
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/auth/login";
+    }
+
     if (process.env.NODE_ENV === "development") {
       console.error("API Error:", {
         message: error.message,
@@ -37,7 +48,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 export const tournamentApi = {
   // Tournament endpoints
   getAllTournaments: async () => {
@@ -130,7 +140,9 @@ export const handleApiError = (error: unknown) => {
     if (error.code === "ECONNREFUSED") {
       return "Cannot connect to the API. Please ensure the server is running.";
     }
-
+    if (error.response?.status === 401) {
+      return "Please log in to continue.";
+    }
     if (error.response?.status === 400) {
       return "Invalid request. Please check your input.";
     }

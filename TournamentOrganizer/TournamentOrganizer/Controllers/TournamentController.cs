@@ -22,7 +22,7 @@ public class TournamentsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userIdStr = User.FindFirst("uid")?.Value;
         if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out Guid userId))
         {
             throw new UnauthorizedAccessException("User not properly authenticated");
@@ -49,7 +49,10 @@ public class TournamentsController : ControllerBase
         var userId = GetCurrentUserId();
         TournamentCoreDto? coreDto = await _tournamentService.GetTournamentByIdAsync(id, userId);
         if (coreDto == null)
+        {
             return NotFound();
+        }
+
         TournamentApiDto apiDto = _mapper.Map<TournamentApiDto>(coreDto);
         return Ok(apiDto);
     }

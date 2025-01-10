@@ -27,12 +27,28 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { ModeToggle } from "./modetoggle";
+import { jwtDecode } from "jwt-decode";
+import { userAgent } from "next/server";
+interface DecodedToken {
+  username?: string;
+}
 
+const token = localStorage.getItem("token");
+let username = "notfound";
+
+if (token) {
+  try {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    username = decodedToken?.username || "notfound";
+  } catch (error) {
+    console.error("Failed to decode token", error);
+  }
+}
 // This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: username,
+    email: "example@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
   teams: [

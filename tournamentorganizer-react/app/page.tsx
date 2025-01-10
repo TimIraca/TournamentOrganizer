@@ -1,15 +1,14 @@
 "use client";
 
-import { ModeToggle } from "@/components/modetoggle";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
-  return (
-    <div>
-      <div className="flex items-center space-x-4">
-        <SidebarTrigger />
-        <ModeToggle />
-      </div>
-    </div>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/tournaments");
+  }, [router]);
+
+  return null;
 }
