@@ -84,7 +84,12 @@ export default function LoginPage() {
               disabled={isLoading}
             />
           </div>
-          <Button className="w-full" type="submit" disabled={isLoading}>
+          <Button
+            className="w-full"
+            data-cy="login-button"
+            type="submit"
+            disabled={isLoading}
+          >
             {isLoading && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
             Login
           </Button>

@@ -1,6 +1,6 @@
 "use client";
-
 import * as React from "react";
+import { useEffect, useState } from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -14,7 +14,6 @@ import {
   SquareTerminal,
   Trophy,
 } from "lucide-react";
-
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
@@ -28,74 +27,79 @@ import {
 } from "@/components/ui/sidebar";
 import { ModeToggle } from "./modetoggle";
 import { jwtDecode } from "jwt-decode";
-import { userAgent } from "next/server";
+
 interface DecodedToken {
   username?: string;
 }
 
-const token = localStorage.getItem("token");
-let username = "notfound";
-
-if (token) {
-  try {
-    const decodedToken = jwtDecode<DecodedToken>(token);
-    username = decodedToken?.username || "notfound";
-  } catch (error) {
-    console.error("Failed to decode token", error);
-  }
-}
-// This is sample data.
-const data = {
-  user: {
-    name: username,
-    email: "example@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Tournament Organizer",
-      logo: Trophy,
-      plan: "organizers",
-    },
-  ],
-  navMain: [
-    {
-      title: "Tournaments",
-      url: "/tournaments",
-      icon: Trophy,
-      isActive: true,
-      items: [
-        {
-          title: "Upcoming",
-          url: "tournaments/upcoming",
-        },
-        {
-          title: "Past",
-          url: "tournaments/past",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-};
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [username, setUsername] = useState("notfound");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const decodedToken = jwtDecode<DecodedToken>(token);
+          setUsername(decodedToken?.username || "notfound");
+        } catch (error) {
+          console.error("Failed to decode token", error);
+        }
+      }
+    }
+  }, []);
+
+  // This is sample data that uses the username state
+  const data = {
+    user: {
+      name: username,
+      email: "example@example.com",
+      avatar: "/avatars/shadcn.jpg",
+    },
+    teams: [
+      {
+        name: "Tournament Organizer",
+        logo: Trophy,
+        plan: "organizers",
+      },
+    ],
+    navMain: [
+      {
+        title: "Tournaments",
+        url: "/tournaments",
+        icon: Trophy,
+        isActive: true,
+        items: [
+          {
+            title: "Upcoming",
+            url: "tournaments/upcoming",
+          },
+          {
+            title: "Past",
+            url: "tournaments/past",
+          },
+        ],
+      },
+    ],
+    projects: [
+      {
+        name: "Design Engineering",
+        url: "#",
+        icon: Frame,
+      },
+      {
+        name: "Sales & Marketing",
+        url: "#",
+        icon: PieChart,
+      },
+      {
+        name: "Travel",
+        url: "#",
+        icon: Map,
+      },
+    ],
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -106,7 +110,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* <NavProjects projects={data.projects} /> */}
         {/* <ModeToggle></ModeToggle> */}
       </SidebarContent>
-
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>

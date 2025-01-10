@@ -3,6 +3,9 @@ describe('Create Tournament', () => {
         cy.intercept('POST', '**/api/Tournaments').as('createTournament')
 
         cy.visit('http://localhost:3000/auth/login/')
+        cy.get('#username').type('admin')
+        cy.get('#password').type('admin')
+        cy.get('[data-cy="login-button"]').click()
         cy.get('[data-cy="create-tournament-button"]').click()
         cy.get('div[role="dialog"]').should('be.visible')
         cy.get('input[id="name"]').type('Tournament 1')
