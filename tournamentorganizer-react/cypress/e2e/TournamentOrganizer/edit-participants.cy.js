@@ -23,7 +23,7 @@ describe('Edit Participants', () => {
             cy.get('[data-cy="participant-name-input"]')
               .should('have.value', 'Renamed Participant');
           });
-  
+        cy.wait(5000);
         cy.get('[data-cy="participant-row"]')
           .last()
           .within(() => {
