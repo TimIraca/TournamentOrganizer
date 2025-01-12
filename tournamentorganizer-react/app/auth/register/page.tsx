@@ -111,7 +111,12 @@ export default function RegisterPage() {
             />
           </div>
 
-          <Button className="w-full" type="submit" disabled={isLoading}>
+          <Button
+            className="w-full"
+            type="submit"
+            data-cy="register-button"
+            disabled={isLoading}
+          >
             {isLoading && <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />}
             Register
           </Button>

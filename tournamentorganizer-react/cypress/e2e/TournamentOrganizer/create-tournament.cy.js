@@ -1,5 +1,5 @@
 describe('Create Tournament', () => {
-    it('should create a tournament successfully', () => {
+    it('should login and create tournament successfully', () => {
         cy.intercept('POST', '**/api/Tournaments').as('createTournament')
 
         cy.visit('http://localhost:3000/auth/login/')
