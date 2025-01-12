@@ -33,7 +33,7 @@ export default function EditParticipants() {
     };
 
     loadParticipants();
-  }, []);
+  }, [tournamentId]);
 
   const handleAddParticipant = async () => {
     if (!newParticipantName.trim()) return;
@@ -111,33 +111,42 @@ export default function EditParticipants() {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto" data-cy="edit-participants-card">
       <CardHeader>
         <CardTitle>
-          Edit Tournament Participants({participants.length})
+          Edit Tournament Participants ({participants.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex space-x-2">
             <Input
+              data-cy="new-participant-input"
               placeholder="New participant name"
               value={newParticipantName}
               onChange={(e) => setNewParticipantName(e.target.value)}
             />
-            <Button onClick={handleAddParticipant}>
+            <Button data-cy="add-participant" onClick={handleAddParticipant}>
               <Plus className="h-4 w-4 mr-2" /> Add
             </Button>
           </div>
+
           {participants.map((participant) => (
-            <div key={participant.id} className="flex items-center space-x-2">
+            <div
+              key={participant.id}
+              className="flex items-center space-x-2"
+              data-cy="participant-row"
+              data-participant-id={participant.id}
+            >
               <Input
+                data-cy="participant-name-input"
                 value={participant.name}
                 onChange={(e) =>
                   handleUpdateParticipant(participant.id, e.target.value)
                 }
               />
               <Button
+                data-cy="delete-participant-button"
                 variant="destructive"
                 size="icon"
                 onClick={() => handleDeleteParticipant(participant.id)}

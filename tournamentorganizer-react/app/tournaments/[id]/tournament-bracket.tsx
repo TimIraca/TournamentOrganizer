@@ -140,6 +140,7 @@ function RoundColumn({
           <MatchCard
             key={match.id}
             match={match}
+            roundnumber={round.roundNumber}
             highlightedParticipantId={highlightedParticipantId}
             setHighlightedParticipantId={setHighlightedParticipantId}
             tournamentId={tournamentId}
@@ -152,12 +153,14 @@ function RoundColumn({
 
 function MatchCard({
   match,
+  roundnumber,
   highlightedParticipantId,
   setHighlightedParticipantId,
   tournamentId,
   onMatchUpdate,
 }: {
   match: Match;
+  roundnumber: number;
   highlightedParticipantId: string | null;
   setHighlightedParticipantId: (id: string | null) => void;
   tournamentId: string;
@@ -199,7 +202,12 @@ function MatchCard({
   }
 
   return (
-    <Card className="w-64">
+    <Card
+      className="w-64"
+      data-cy={`match-${match.id}`}
+      data-match-number={match.matchNumber}
+      data-round-number={roundnumber}
+    >
       <CardContent className="p-4">
         {match.participants.length === 0 ? (
           <>
@@ -218,6 +226,7 @@ function MatchCard({
                   label: "Declare Winner",
                   icon: <Trophy className="w-4 h-4 mr-1" />,
                   onClick: () => handleDeclareWinner(participant.id),
+                  "data-cy": `declare-winner-${participant.name}`,
                 },
               ];
 
@@ -245,9 +254,12 @@ function MatchCard({
               );
 
               return (
-                <React.Fragment key={participant.id}>
+                <React.Fragment key={participant.id} data-cy={participant.name}>
                   {isEligibleForContextMenu ? (
-                    <GeneralDropdownMenu actions={actions}>
+                    <GeneralDropdownMenu
+                      actions={actions}
+                      data-cy={participant.name}
+                    >
                       {participantContent}
                     </GeneralDropdownMenu>
                   ) : (

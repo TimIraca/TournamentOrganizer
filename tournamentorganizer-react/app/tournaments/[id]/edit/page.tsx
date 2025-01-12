@@ -25,7 +25,7 @@ export default function EditTournamentPage() {
           Edit Tournament
         </h1>
         <Link href={`/tournaments/${id}/`}>
-          <Button>
+          <Button data-cy="return-to-tournament-button">
             <ArrowLeft className="h-4 w-4" />
             Return to Tournament
           </Button>
