@@ -43,7 +43,7 @@ export default function Page() {
           Tournament: {tournamentName || "Loading..."}
         </h1>
         <Link href={`/tournaments/${id}/edit/`}>
-          <Button>
+          <Button data-cy="edit-tournament-button">
             <Edit className="mr-2 h-4 w-4" />
             Edit Tournament
           </Button>

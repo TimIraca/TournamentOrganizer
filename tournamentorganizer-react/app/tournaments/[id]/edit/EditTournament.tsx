@@ -219,6 +219,7 @@ export default function EditTournament() {
     <>
       <Card className="w-full max-w-2xl mx-auto relative">
         <Button
+          data-cy="delete-tournament-button"
           variant="destructive"
           size="icon"
           className="absolute top-4 right-4"
@@ -234,6 +235,7 @@ export default function EditTournament() {
             <div className="space-y-2">
               <Label htmlFor="tournamentName">Tournament Name</Label>
               <Input
+                data-cy="tournament-name-input"
                 id="tournamentName"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -281,6 +283,7 @@ export default function EditTournament() {
                 Save Changes
               </Button>
               <Button
+                data-cy="start-tournament-button"
                 variant="default"
                 onClick={() => setActiveDialog("start")}
               >
@@ -310,7 +313,10 @@ export default function EditTournament() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={activeDialogConfig?.action}>
+            <AlertDialogAction
+              data-cy="confirm-delete-button"
+              onClick={activeDialogConfig?.action}
+            >
               {activeDialogConfig?.actionText}
             </AlertDialogAction>
           </AlertDialogFooter>
