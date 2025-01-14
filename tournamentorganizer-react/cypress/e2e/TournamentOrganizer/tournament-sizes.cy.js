@@ -17,7 +17,6 @@ describe('Tournament Size Variations', () => {
           }
 
           cy.startTournament();
-          cy.get('[data-cy="return-to-tournament-button"]').click();
 
           const totalMatches = count - 1;
 

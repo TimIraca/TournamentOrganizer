@@ -12,7 +12,6 @@ describe('Tournament Basic Flow', () => {
             cy.addParticipant(name);
           });
           cy.startTournament();
-          cy.get('[data-cy="return-to-tournament-button"]').click();
           cy.declareWinner(1);
           cy.declareWinner(2);
           cy.declareWinner(3);

@@ -146,6 +146,7 @@ export default function EditTournament() {
           description: "The tournament has been successfully started.",
         });
         router.refresh();
+        router.push(`/tournaments/${tournament.id}`);
       } catch (err) {
         console.error("Error starting tournament:", err);
         toast({
