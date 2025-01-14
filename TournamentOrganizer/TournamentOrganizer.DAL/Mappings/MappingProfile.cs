@@ -3,7 +3,7 @@ using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.DTOs.Overview;
 using TournamentOrganizer.DAL.Entities;
 
-namespace TournamentOrganizer.Core.Mappings
+namespace TournamentOrganizer.DAL.Mappings
 {
     public class MappingProfile : Profile
     {
@@ -16,6 +16,7 @@ namespace TournamentOrganizer.Core.Mappings
             CreateMap<Participant, ParticipantOverviewDto>().ReverseMap();
             CreateMap<Match, MatchOverviewDto>().ReverseMap();
             CreateMap<Round, RoundOverviewDto>().ReverseMap();
+            CreateMap<User, UserCoreDto>().ReverseMap();
         }
     }
 }

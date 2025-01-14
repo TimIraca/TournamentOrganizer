@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.Services.Interfaces;
-using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 namespace TournamentOrganizer.Core.Services.Implementations
 {
@@ -24,13 +17,13 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task<RoundCoreDto?> GetByIdAsync(Guid id)
         {
-            Round round = await _roundRepository.GetByIdAsync(id);
+            RoundCoreDto round = await _roundRepository.GetByIdAsync(id);
             return _mapper.Map<RoundCoreDto>(round);
         }
 
         public async Task<IEnumerable<RoundCoreDto>> GetAllByTournamentIdAsync(Guid tournamentId)
         {
-            IEnumerable<Round> rounds = await _roundRepository.GetAllByTournamentIdAsync(
+            IEnumerable<RoundCoreDto> rounds = await _roundRepository.GetAllByTournamentIdAsync(
                 tournamentId
             );
             return _mapper.Map<IEnumerable<RoundCoreDto>>(rounds);
@@ -38,14 +31,14 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task<RoundCoreDto> AddAsync(RoundCoreDto round)
         {
-            Round roundEntity = _mapper.Map<Round>(round);
-            Round addedRound = await _roundRepository.AddAsync(roundEntity);
+            RoundCoreDto roundEntity = _mapper.Map<RoundCoreDto>(round);
+            RoundCoreDto addedRound = await _roundRepository.AddAsync(roundEntity);
             return _mapper.Map<RoundCoreDto>(addedRound);
         }
 
         public async Task UpdateAsync(RoundCoreDto round)
         {
-            Round roundEntity = _mapper.Map<Round>(round);
+            RoundCoreDto roundEntity = _mapper.Map<RoundCoreDto>(round);
             await _roundRepository.UpdateAsync(roundEntity);
         }
 

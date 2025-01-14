@@ -2,9 +2,6 @@
 using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.DTOs.Overview;
 using TournamentOrganizer.Core.Services.Interfaces;
-using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Implementations;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 namespace TournamentOrganizer.Core.Services.Implementations
 {
@@ -33,13 +30,15 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task<TournamentCoreDto?> GetTournamentByIdAsync(Guid id, Guid userId)
         {
-            Tournament? tournament = await _tournamentRepository.GetByIdAsync(id, userId);
+            TournamentCoreDto? tournament = await _tournamentRepository.GetByIdAsync(id, userId);
             return tournament == null ? null : _mapper.Map<TournamentCoreDto>(tournament);
         }
 
         public async Task<IEnumerable<TournamentCoreDto>> GetAllTournamentsAsync(Guid userId)
         {
-            IEnumerable<Tournament> tournaments = await _tournamentRepository.GetAllAsync(userId);
+            IEnumerable<TournamentCoreDto> tournaments = await _tournamentRepository.GetAllAsync(
+                userId
+            );
             return _mapper.Map<IEnumerable<TournamentCoreDto>>(tournaments);
         }
 
@@ -48,10 +47,10 @@ namespace TournamentOrganizer.Core.Services.Implementations
             Guid userId
         )
         {
-            Tournament tournament = _mapper.Map<Tournament>(tournamentDto);
+            TournamentCoreDto tournament = _mapper.Map<TournamentCoreDto>(tournamentDto);
             tournament.UserId = userId;
             // Add the tournament and get the created entity
-            Tournament createdTournament = await _tournamentRepository.AddAsync(tournament);
+            TournamentCoreDto createdTournament = await _tournamentRepository.AddAsync(tournament);
 
             // Map the created entity back to a Core DTO
             return _mapper.Map<TournamentCoreDto>(createdTournament);
@@ -59,7 +58,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task UpdateTournamentAsync(TournamentCoreDto tournamentDto, Guid userId)
         {
-            Tournament tournament = _mapper.Map<Tournament>(tournamentDto);
+            TournamentCoreDto tournament = _mapper.Map<TournamentCoreDto>(tournamentDto);
             await _tournamentRepository.UpdateAsync(tournament, userId);
         }
 
@@ -70,11 +69,11 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task StartTournamentAsync(Guid id, Guid userId)
         {
-            Tournament tournament =
+            TournamentCoreDto tournament =
                 await _tournamentRepository.GetByIdAsync(id, userId)
                 ?? throw new InvalidOperationException("Tournament not found");
 
-            if (tournament.Participants == null || tournament.Participants.Count < 3)
+            if (tournament.Participants == null || tournament.Participants.Count() < 3)
             {
                 throw new InvalidOperationException(
                     "Tournament must have at least 3 participants to start."
@@ -82,16 +81,15 @@ namespace TournamentOrganizer.Core.Services.Implementations
             }
 
             // Check if tournament already has rounds
-            IEnumerable<Round> existingRounds = await _roundRepository.GetAllByTournamentIdAsync(
-                tournament.Id
-            );
+            IEnumerable<RoundCoreDto> existingRounds =
+                await _roundRepository.GetAllByTournamentIdAsync(tournament.Id);
             if (existingRounds.Any())
             {
                 throw new InvalidOperationException("Tournament already started.");
             }
 
             // Shuffle participants for randomness
-            List<Participant> participants = tournament
+            List<ParticipantCoreDto> participants = tournament
                 .Participants.OrderBy(_ => Guid.NewGuid())
                 .ToList();
             List<ParticipantCoreDto> participantDtos = _mapper.Map<List<ParticipantCoreDto>>(
@@ -102,164 +100,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
                 .ToList();
             foreach (RoundCoreDto round in rounds)
             {
-                await _roundRepository.AddAsync(_mapper.Map<Round>(round));
-            }
-        }
-
-        public static IEnumerable<RoundCoreDto> GenerateBracket(
-            IEnumerable<ParticipantCoreDto> participants,
-            Guid tournamentId
-        )
-        {
-            if (participants == null)
-            {
-                throw new ArgumentNullException(nameof(participants));
-            }
-
-            List<ParticipantCoreDto> participantsList = participants.ToList();
-            if (participantsList.Count == 0)
-            {
-                throw new ArgumentException(
-                    "Must have at least one participant",
-                    nameof(participants)
-                );
-            }
-
-            List<RoundCoreDto> rounds = new List<RoundCoreDto>();
-            int matchNumber = 1;
-
-            // For 5 participants with 3 byes:
-            // First 3 participants get byes (indexes 0-2)
-            // Last 2 participants play in first round (indexes 3-4)
-
-            // Round 1: One match with the non-bye players
-            List<MatchCoreDto> round1Matches = new List<MatchCoreDto>
-            {
-                new MatchCoreDto
-                {
-                    Id = Guid.NewGuid(),
-                    MatchNumber = matchNumber++,
-                    Participant1Id = participantsList[3].Id, // Player 4
-                    Participant2Id = participantsList[
-                        4
-                    ].Id // Player 5
-                    ,
-                },
-            };
-
-            rounds.Add(
-                new RoundCoreDto
-                {
-                    Id = Guid.NewGuid(),
-                    RoundNumber = 1,
-                    TournamentId = tournamentId,
-                    Matches = round1Matches,
-                }
-            );
-
-            // Round 2: Two matches
-            List<MatchCoreDto> round2Matches = new List<MatchCoreDto>
-            {
-                // Match 2: Bye players 2 vs 3
-                new MatchCoreDto
-                {
-                    Id = Guid.NewGuid(),
-                    MatchNumber = matchNumber++,
-                    Participant1Id = participantsList[1].Id, // Player 2
-                    Participant2Id = participantsList[
-                        2
-                    ].Id // Player 3
-                    ,
-                },
-                // Match 3: Bye player 1 vs Winner(Match 1)
-                new MatchCoreDto
-                {
-                    Id = Guid.NewGuid(),
-                    MatchNumber = matchNumber++,
-                    Participant1Id = participantsList[0].Id, // Player 1
-                    Participant2Id =
-                        null // Will get winner from Match 1
-                    ,
-                },
-            };
-
-            rounds.Add(
-                new RoundCoreDto
-                {
-                    Id = Guid.NewGuid(),
-                    RoundNumber = 2,
-                    TournamentId = tournamentId,
-                    Matches = round2Matches,
-                }
-            );
-
-            // Round 3: Finals
-            List<MatchCoreDto> round3Matches = new List<MatchCoreDto>
-            {
-                new MatchCoreDto
-                {
-                    Id = Guid.NewGuid(),
-                    MatchNumber = matchNumber++,
-                    Participant1Id = null, // Will get winner from Match 2
-                    Participant2Id =
-                        null // Will get winner from Match 3
-                    ,
-                },
-            };
-
-            rounds.Add(
-                new RoundCoreDto
-                {
-                    Id = Guid.NewGuid(),
-                    RoundNumber = 3,
-                    TournamentId = tournamentId,
-                    Matches = round3Matches,
-                }
-            );
-
-            return rounds;
-        }
-
-        public void UpdateBracket(IEnumerable<RoundCoreDto> rounds, Guid winnerId, Guid matchId)
-        {
-            RoundCoreDto? currentRound = rounds.FirstOrDefault(r =>
-                r.Matches.Any(m => m.Id == matchId)
-            );
-            if (currentRound == null)
-            {
-                return;
-            }
-
-            MatchCoreDto completedMatch = currentRound.Matches.First(m => m.Id == matchId);
-            completedMatch.WinnerId = winnerId;
-
-            RoundCoreDto? nextRound = rounds.FirstOrDefault(r =>
-                r.RoundNumber == currentRound.RoundNumber + 1
-            );
-            if (nextRound == null)
-            {
-                return;
-            }
-
-            if (currentRound.RoundNumber == 1)
-            {
-                // Winner of Match 1 goes to Match 3 (second match of round 2)
-                MatchCoreDto nextMatch = nextRound.Matches.ElementAt(1);
-                nextMatch.Participant2Id = winnerId;
-            }
-            else if (currentRound.RoundNumber == 2)
-            {
-                // Winners from Match 2 and 3 go to the finals
-                MatchCoreDto finalMatch = nextRound.Matches.First();
-
-                if (completedMatch.MatchNumber == 2)
-                {
-                    finalMatch.Participant1Id = winnerId;
-                }
-                else // Match 3
-                {
-                    finalMatch.Participant2Id = winnerId;
-                }
+                await _roundRepository.AddAsync(round);
             }
         }
 
@@ -269,7 +110,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
         )
         {
             // Fetch tournament data
-            Tournament? tournament = await _tournamentRepository.GetByIdAsync(tournamentId, userId);
+            var tournament = await _tournamentRepository.GetByIdAsync(tournamentId, userId);
             if (tournament == null)
             {
                 return null;

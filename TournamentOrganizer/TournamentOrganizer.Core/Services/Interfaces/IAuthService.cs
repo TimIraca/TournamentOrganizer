@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TournamentOrganizer.DAL.Entities;
+﻿using TournamentOrganizer.Core.DTOs;
 
 namespace TournamentOrganizer.Core.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<string> GenerateToken(User user);
+        Task<string> GenerateToken(UserCoreDto user);
         Task<bool> ValidateCredentials(string username, string password);
-        Task<User> RegisterUser(string username, string password);
-        Task<User> GetUserByUsernameAsync(string username);
+        Task<UserCoreDto> RegisterUser(string username, string password);
+        Task<UserCoreDto> GetUserByUsernameAsync(string username);
     }
 }

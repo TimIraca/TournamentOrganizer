@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TournamentOrganizer.DAL.Entities;
-
-namespace TournamentOrganizer.Core.DTOs
+﻿namespace TournamentOrganizer.Core.DTOs
 {
     public class TournamentCoreDto
     {

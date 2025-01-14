@@ -3,9 +3,8 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.Services.Interfaces;
-using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 namespace TournamentOrganizer.Core.Services.Implementations
 {
@@ -20,7 +19,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             _authRepository = authRepository;
         }
 
-        public Task<string> GenerateToken(User user)
+        public Task<string> GenerateToken(UserCoreDto user)
         {
             var securityKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
@@ -58,7 +57,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
         }
 
-        public async Task<User> RegisterUser(string username, string password)
+        public async Task<UserCoreDto> RegisterUser(string username, string password)
         {
             if (await _authRepository.UsernameExistsAsync(username))
             {
@@ -68,7 +67,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             return await _authRepository.CreateUserAsync(username, password);
         }
 
-        public async Task<User> GetUserByUsernameAsync(string username)
+        public async Task<UserCoreDto> GetUserByUsernameAsync(string username)
         {
             return await _authRepository.GetUserByUsernameAsync(username);
         }

@@ -1,34 +1,37 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using TournamentOrganizer.Core.DTOs;
+using TournamentOrganizer.Core.Services.Interfaces;
 using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 namespace TournamentOrganizer.DAL.Repositories.Implementations
 {
     public class AuthRepository : IAuthRepository
     {
         private readonly TournamentContext _context;
+        private readonly IMapper _mapper;
 
-        public AuthRepository(TournamentContext context)
+        public AuthRepository(TournamentContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<UserCoreDto> GetUserByIdAsync(int id)
         {
-            return await _context.Users.FindAsync(id);
+            UserCoreDto user = _mapper.Map<UserCoreDto>(await _context.Users.FindAsync(id));
+            return user;
         }
 
-        public async Task<User> GetUserByUsernameAsync(string username)
+        public async Task<UserCoreDto> GetUserByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            UserCoreDto user = _mapper.Map<UserCoreDto>(
+                await _context.Users.FirstOrDefaultAsync(u => u.Username == username)
+            );
+            return user;
         }
 
-        public async Task<User> CreateUserAsync(string username, string password)
+        public async Task<UserCoreDto> CreateUserAsync(string username, string password)
         {
             var user = new User
             {
@@ -38,7 +41,8 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return user;
+            UserCoreDto usercore = _mapper.Map<UserCoreDto>(user);
+            return usercore;
         }
 
         public async Task<bool> UsernameExistsAsync(string username)
