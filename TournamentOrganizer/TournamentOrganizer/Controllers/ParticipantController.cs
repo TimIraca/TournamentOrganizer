@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TournamentOrganizer.api.DTOs;
 using TournamentOrganizer.Core.DTOs;
-using TournamentOrganizer.Core.Services.Interfaces;
+using TournamentOrganizer.Core.Interfaces.Services;
 
 namespace TournamentOrganizer.api.Controllers
 {

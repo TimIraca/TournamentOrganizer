@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.DTOs.Overview;
 
-namespace TournamentOrganizer.Core.Services.Interfaces
+namespace TournamentOrganizer.Core.Interfaces.Services
 {
     public interface ITournamentService
     {

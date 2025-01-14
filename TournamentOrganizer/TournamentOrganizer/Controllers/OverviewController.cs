@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TournamentOrganizer.Core.Services.Interfaces;
+using TournamentOrganizer.Core.Interfaces.Services;
 
 namespace TournamentOrganizer.api.Controllers
 {

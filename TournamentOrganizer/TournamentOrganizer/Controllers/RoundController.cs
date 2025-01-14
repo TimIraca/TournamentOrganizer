@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using TournamentOrganizer.Core.Services.Interfaces;
 
 namespace TournamentOrganizer.api.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
     using TournamentOrganizer.api.DTOs;
     using TournamentOrganizer.Core.DTOs;
+    using TournamentOrganizer.Core.Interfaces.Services;
 
     [ApiController]
     [Route("api/tournaments/{tournamentId}/rounds")]

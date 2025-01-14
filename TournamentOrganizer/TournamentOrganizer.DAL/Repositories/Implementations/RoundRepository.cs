@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TournamentOrganizer.Core.DTOs;
-using TournamentOrganizer.Core.Services.Interfaces;
+using TournamentOrganizer.Core.Interfaces.Repositories;
 using TournamentOrganizer.DAL.Entities;
 
 namespace TournamentOrganizer.DAL.Repositories.Implementations
