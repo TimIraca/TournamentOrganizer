@@ -11,7 +11,6 @@ using TournamentOrganizer.api.Controllers;
 using TournamentOrganizer.api.DTOs;
 using TournamentOrganizer.Core;
 using TournamentOrganizer.Core.DTOs;
-using TournamentOrganizer.Core.Services.Interfaces;
 
 namespace TournamentOrganizer.api.Controllers.Tests
 {

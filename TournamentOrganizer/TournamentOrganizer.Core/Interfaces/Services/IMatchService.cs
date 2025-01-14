@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TournamentOrganizer.Core.DTOs;
 
-namespace TournamentOrganizer.Core.Services.Interfaces
+namespace TournamentOrganizer.Core.Interfaces.Services
 {
     public interface IMatchService
     {

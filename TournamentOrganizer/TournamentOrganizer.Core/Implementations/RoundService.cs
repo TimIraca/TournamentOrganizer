@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using TournamentOrganizer.Core.DTOs;
-using TournamentOrganizer.Core.Services.Interfaces;
+using TournamentOrganizer.Core.Interfaces.Repositories;
+using TournamentOrganizer.Core.Interfaces.Services;
 
-namespace TournamentOrganizer.Core.Services.Implementations
+namespace TournamentOrganizer.Core.Implementations
 {
     public class RoundService : IRoundService
     {

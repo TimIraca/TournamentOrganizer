@@ -1,6 +1,6 @@
 ﻿using TournamentOrganizer.Core.DTOs;
 
-namespace TournamentOrganizer.Core.Services.Interfaces
+namespace TournamentOrganizer.Core.Interfaces.Repositories
 {
     public interface ITournamentRepository
     {

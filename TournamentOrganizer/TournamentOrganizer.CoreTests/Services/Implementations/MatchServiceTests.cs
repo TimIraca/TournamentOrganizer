@@ -2,8 +2,8 @@
 using Moq;
 using TournamentOrganizer.Core;
 using TournamentOrganizer.Core.DTOs;
-using TournamentOrganizer.Core.Services.Implementations;
-using TournamentOrganizer.Core.Services.Interfaces;
+using TournamentOrganizer.Core.Implementations;
+using TournamentOrganizer.Core.Interfaces.Repositories;
 using TournamentOrganizer.DAL.Entities;
 using Match = TournamentOrganizer.DAL.Entities.Match;
 
