@@ -7,7 +7,7 @@ describe('Tournament Size Variations', () => {
 
   participantCounts.forEach((count) => {
     it(`should handle a tournament with ${count} participants`, () => {
-      cy.createTournament(`Tournament with ${count} participants`, '2025-03-01')
+      cy.createTournament(`Tournament with ${count} participants`, '12122024')
         .then((tournamentId) => {
           cy.get(`[href="/tournaments/${tournamentId}"]`).click();
           cy.get('[data-cy="edit-tournament-button"]').click();

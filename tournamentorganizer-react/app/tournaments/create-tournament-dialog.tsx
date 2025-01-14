@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +12,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-
 import { editTournament } from "@/types";
 import { PlusCircle } from "lucide-react";
+import { formatDateInput, validateDate, convertToISODate } from "@/lib/utils";
 
 interface CreateTournamentDialogProps {
   onCreateTournament: (tournament: editTournament) => void;
@@ -27,14 +25,19 @@ export function CreateTournamentDialog({
 }: CreateTournamentDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [startDate, setStartDate] = useState<string>("");
+  const [dateInput, setDateInput] = useState("");
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatDateInput(e.target.value);
+    setDateInput(formatted);
+  };
 
   const handleCreateTournament = () => {
-    if (!name || !startDate) {
+    if (!name || !dateInput || !validateDate(dateInput)) {
       toast({
         title: "Error",
         description:
-          "Please provide both a name and a start date for the tournament.",
+          "Please provide a valid name and date (DD/MM/YYYY) for the tournament.",
         variant: "destructive",
       });
       return;
@@ -42,13 +45,13 @@ export function CreateTournamentDialog({
 
     const newTournament: editTournament = {
       name,
-      startDate: new Date(startDate).toISOString(),
+      startDate: convertToISODate(dateInput),
     };
 
     onCreateTournament(newTournament);
     setOpen(false);
     setName("");
-    setStartDate("");
+    setDateInput("");
     toast({
       title: "Success",
       description: "New tournament created successfully.",
@@ -63,7 +66,7 @@ export function CreateTournamentDialog({
           New Tournament
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create New Tournament</DialogTitle>
           <DialogDescription>
@@ -87,13 +90,15 @@ export function CreateTournamentDialog({
             <Label htmlFor="startDate" className="text-right">
               Start Date
             </Label>
-            <Input
-              type="date"
-              id="startDate"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="col-span-3"
-            />
+            <div className="col-span-3">
+              <Input
+                id="startDate"
+                placeholder="DD/MM/YYYY"
+                value={dateInput}
+                onChange={handleDateChange}
+                maxLength={10}
+              />
+            </div>
           </div>
         </div>
         <DialogFooter>

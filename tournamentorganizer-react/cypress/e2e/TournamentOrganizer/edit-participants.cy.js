@@ -4,7 +4,7 @@ describe('Edit Participants', () => {
     });
   
     it('should add, edit, and delete a participant in a newly created tournament', () => {
-      cy.createTournament('Cypress Test Tournament', '2025-03-01').then((tournamentId) => {
+      cy.createTournament('Cypress Test Tournament', '12122024').then((tournamentId) => {
         cy.get(`[href="/tournaments/${tournamentId}"]`).click();
         cy.get('[data-cy="edit-tournament-button"]').click();
   

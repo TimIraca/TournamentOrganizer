@@ -4,7 +4,7 @@ describe('Tournament Basic Flow', () => {
     });
   
     it('should create a tournament, add participants, start, and complete it', () => {
-      cy.createTournament('Basic Flow Tournament', '2025-01-01')
+      cy.createTournament('Basic Flow Tournament', '12122024')
         .then((tournamentId) => {
           cy.get(`[href="/tournaments/${tournamentId}"]`).click();
           cy.get('[data-cy="edit-tournament-button"]').click();
@@ -21,9 +21,5 @@ describe('Tournament Basic Flow', () => {
           cy.get('[data-cy="confirm-delete-button"]').click();
           cy.get(`[href="/tournaments/${tournamentId}"]`).should('not.exist');
         });
-    });
-  
-    after(() => {
-      // Optionally clean up
     });
   });

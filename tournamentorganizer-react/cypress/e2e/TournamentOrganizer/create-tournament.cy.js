@@ -9,7 +9,7 @@ describe('Create Tournament', () => {
         cy.get('[data-cy="create-tournament-button"]').click()
         cy.get('div[role="dialog"]').should('be.visible')
         cy.get('input[id="name"]').type('Tournament 1')
-        cy.get('input[id="startDate"]').type('2024-12-12')
+        cy.get('input[id="startDate"]').type('12122024')
         cy.get('button[type="submit"]').click()
         
         cy.wait('@createTournament').then((interception) => {
