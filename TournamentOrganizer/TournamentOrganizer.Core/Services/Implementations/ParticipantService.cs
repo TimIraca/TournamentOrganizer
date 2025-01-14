@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.Services.Interfaces;
-using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 namespace TournamentOrganizer.Core.Services.Implementations
 {
@@ -26,21 +19,23 @@ namespace TournamentOrganizer.Core.Services.Implementations
             Guid tournamentId
         )
         {
-            IEnumerable<Participant> participants =
+            IEnumerable<ParticipantCoreDto> participants =
                 await _participantRepository.GetAllByTournamentIdAsync(tournamentId);
             return _mapper.Map<IEnumerable<ParticipantCoreDto>>(participants);
         }
 
         public async Task<ParticipantCoreDto> AddParticipantAsync(ParticipantCoreDto participantDto)
         {
-            Participant participant = _mapper.Map<Participant>(participantDto);
-            Participant CreatedParticipant = await _participantRepository.AddAsync(participant);
+            ParticipantCoreDto participant = _mapper.Map<ParticipantCoreDto>(participantDto);
+            ParticipantCoreDto CreatedParticipant = await _participantRepository.AddAsync(
+                participant
+            );
             return _mapper.Map<ParticipantCoreDto>(CreatedParticipant);
         }
 
         public async Task UpdateParticipantAsync(ParticipantCoreDto participantDto)
         {
-            Participant participant = _mapper.Map<Participant>(participantDto);
+            ParticipantCoreDto participant = _mapper.Map<ParticipantCoreDto>(participantDto);
             await _participantRepository.UpdateAsync(participant);
         }
 

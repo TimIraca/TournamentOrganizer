@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.Services.Interfaces;
-using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Implementations;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 namespace TournamentOrganizer.Core.Services.Implementations
 {
@@ -31,7 +23,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task<MatchCoreDto?> GetByIdAsync(Guid id)
         {
-            Match? match = await _matchRepository.GetByIdAsync(id);
+            MatchCoreDto? match = await _matchRepository.GetByIdAsync(id);
             if (match == null)
             {
                 throw new NotFoundException($"Match with ID {id} not found");
@@ -42,32 +34,34 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task<IEnumerable<MatchCoreDto>> GetAllByRoundIdAsync(Guid roundId)
         {
-            IEnumerable<Match> matches = await _matchRepository.GetAllByRoundIdAsync(roundId);
+            IEnumerable<MatchCoreDto> matches = await _matchRepository.GetAllByRoundIdAsync(
+                roundId
+            );
             return _mapper.Map<IEnumerable<MatchCoreDto>>(matches);
         }
 
         public async Task<MatchCoreDto> AddAsync(MatchCoreDto match)
         {
-            Match matchEntity = _mapper.Map<Match>(match);
-            Match addedMatch = await _matchRepository.AddAsync(matchEntity);
+            MatchCoreDto matchEntity = _mapper.Map<MatchCoreDto>(match);
+            MatchCoreDto addedMatch = await _matchRepository.AddAsync(matchEntity);
             return _mapper.Map<MatchCoreDto>(addedMatch);
         }
 
         public async Task UpdateAsync(MatchCoreDto match)
         {
-            Match? existingMatch = await _matchRepository.GetByIdAsync(match.Id);
+            MatchCoreDto? existingMatch = await _matchRepository.GetByIdAsync(match.Id);
             if (existingMatch == null)
             {
                 throw new NotFoundException($"Match with ID {match.Id} not found");
             }
 
-            Match matchEntity = _mapper.Map<Match>(match);
+            MatchCoreDto matchEntity = _mapper.Map<MatchCoreDto>(match);
             await _matchRepository.UpdateAsync(matchEntity);
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            Match? existingMatch = await _matchRepository.GetByIdAsync(id);
+            MatchCoreDto? existingMatch = await _matchRepository.GetByIdAsync(id);
             if (existingMatch == null)
             {
                 throw new NotFoundException($"Match with ID {id} not found");
@@ -78,7 +72,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
         public async Task DeclareMatchWinnerAsync(Guid tournamentId, Guid matchId, Guid winnerId)
         {
-            IEnumerable<Round> rounds = await _roundRepository.GetAllByTournamentIdAsync(
+            IEnumerable<RoundCoreDto> rounds = await _roundRepository.GetAllByTournamentIdAsync(
                 tournamentId
             );
             if (!rounds.Any())
@@ -86,7 +80,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
                 throw new NotFoundException($"No rounds found for tournament {tournamentId}");
             }
 
-            Match? match = await _matchRepository.GetByIdAsync(matchId);
+            MatchCoreDto? match = await _matchRepository.GetByIdAsync(matchId);
             if (match == null)
             {
                 throw new NotFoundException($"Match with ID {matchId} not found");
@@ -104,7 +98,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
 
             foreach (RoundCoreDto round in roundDtos)
             {
-                await _roundRepository.UpdateAsync(_mapper.Map<Round>(round));
+                await _roundRepository.UpdateAsync(_mapper.Map<RoundCoreDto>(round));
             }
         }
     }

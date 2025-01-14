@@ -1,50 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using TournamentOrganizer.Core.DTOs;
+using TournamentOrganizer.Core.Services.Interfaces;
 using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 namespace TournamentOrganizer.DAL.Repositories.Implementations
 {
     public class MatchRepository : IMatchRepository
     {
         private readonly TournamentContext _context;
+        private readonly IMapper _mapper;
 
-        public MatchRepository(TournamentContext context)
+        public MatchRepository(TournamentContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<Match?> GetByIdAsync(Guid id)
+        public async Task<MatchCoreDto?> GetByIdAsync(Guid id)
         {
-            return await _context
+            var match = await _context
                 .Matches.Include(m => m.Participant1)
                 .Include(m => m.Participant2)
                 .Include(m => m.Winner)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+            return _mapper.Map<MatchCoreDto?>(match);
         }
 
-        public async Task<IEnumerable<Match>> GetAllByRoundIdAsync(Guid roundId)
+        public async Task<IEnumerable<MatchCoreDto>> GetAllByRoundIdAsync(Guid roundId)
         {
-            return await _context
+            var matches = await _context
                 .Matches.Where(m => m.RoundId == roundId)
                 .Include(m => m.Participant1)
                 .Include(m => m.Participant2)
                 .Include(m => m.Winner)
                 .ToListAsync();
+
+            return _mapper.Map<IEnumerable<MatchCoreDto>>(matches);
         }
 
-        public async Task<Match> AddAsync(Match match)
+        public async Task<MatchCoreDto> AddAsync(MatchCoreDto match)
         {
-            await _context.Matches.AddAsync(match);
+            await _context.Matches.AddAsync(_mapper.Map<Match>(match));
             await _context.SaveChangesAsync();
-            return match;
+            MatchCoreDto matchDto = _mapper.Map<MatchCoreDto>(match);
+            return matchDto;
         }
 
-        public async Task UpdateAsync(Match match)
+        public async Task UpdateAsync(MatchCoreDto match)
         {
             Match? existingMatch = await _context.Matches.FindAsync(match.Id);
             if (existingMatch != null)
@@ -56,7 +60,7 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task DeleteAsync(Guid id)
         {
-            Match? match = await GetByIdAsync(id);
+            Match? match = await _context.Matches.FindAsync(id);
             if (match == null)
                 return;
 

@@ -1,48 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using TournamentOrganizer.Core.DTOs;
+using TournamentOrganizer.Core.Services.Interfaces;
 using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 namespace TournamentOrganizer.DAL.Repositories.Implementations
 {
     public class RoundRepository : IRoundRepository
     {
         private readonly TournamentContext _context;
+        private readonly IMapper _mapper;
 
-        public RoundRepository(TournamentContext context)
+        public RoundRepository(TournamentContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<Round?> GetByIdAsync(Guid id)
+        public async Task<RoundCoreDto?> GetByIdAsync(Guid id)
         {
             return await _context
                 .Rounds.Include(r => r.Matches)
-                .FirstOrDefaultAsync(r => r.Id == id);
+                .Where(r => r.Id == id)
+                .Select(r => _mapper.Map<RoundCoreDto>(r))
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Round>> GetAllByTournamentIdAsync(Guid tournamentId)
+        public async Task<IEnumerable<RoundCoreDto>> GetAllByTournamentIdAsync(Guid tournamentId)
         {
             return await _context
                 .Rounds.Where(r => r.TournamentId == tournamentId)
                 .Include(r => r.Matches)
                 .OrderBy(r => r.RoundNumber)
+                .Select(r => _mapper.Map<RoundCoreDto>(r))
                 .ToListAsync();
         }
 
-        public async Task<Round> AddAsync(Round round)
+        public async Task<RoundCoreDto> AddAsync(RoundCoreDto round)
         {
-            await _context.Rounds.AddAsync(round);
+            Round roundDAL = _mapper.Map<Round>(round);
+            await _context.Rounds.AddAsync(roundDAL);
             await _context.SaveChangesAsync();
-            return round;
+            return _mapper.Map<RoundCoreDto>(round);
         }
 
-        public async Task UpdateAsync(Round round)
+        public async Task UpdateAsync(RoundCoreDto roundcore)
         {
+            Round round = _mapper.Map<Round>(roundcore);
             foreach (Match match in round.Matches)
             {
                 Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<Match> matchEntry =
@@ -74,9 +78,11 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
 
         public async Task DeleteAsync(Guid id)
         {
-            Round? round = await GetByIdAsync(id);
+            Round? round = await _context.Rounds.FindAsync(id);
             if (round == null)
+            {
                 return;
+            }
 
             _context.Rounds.Remove(round);
             await _context.SaveChangesAsync();

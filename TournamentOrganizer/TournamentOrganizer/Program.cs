@@ -4,23 +4,48 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TournamentOrganizer.api.Mappings;
-using TournamentOrganizer.Core.Mappings;
 using TournamentOrganizer.Core.Services.Implementations;
 using TournamentOrganizer.Core.Services.Interfaces;
 using TournamentOrganizer.DAL;
+using TournamentOrganizer.DAL.Mappings;
 using TournamentOrganizer.DAL.Repositories.Implementations;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Database
+builder.Services.AddDbContext<TournamentContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
+// Repositories
+builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
+builder.Services.AddScoped<IParticipantRepository, ParticipantRepository>();
+builder.Services.AddScoped<IRoundRepository, RoundRepository>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+// Services
+builder.Services.AddScoped<ITournamentService, TournamentService>();
+builder.Services.AddScoped<IParticipantService, ParticipantService>();
+builder.Services.AddScoped<IRoundService, RoundService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<DatabaseSeeder>();
+
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddAutoMapper(typeof(ApiMappingProfile));
+
+// Controllers
 builder.Services.AddControllers();
+
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         "AllowReactApp",
-        builder =>
-            builder
+        policyBuilder =>
+            policyBuilder
                 .WithOrigins(
                     "http://localhost:3000",
                     "https://localhost:3000",
@@ -31,25 +56,7 @@ builder.Services.AddCors(options =>
     );
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<TournamentContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-builder.Services.AddScoped<ITournamentService, TournamentService>();
-builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
-builder.Services.AddScoped<IParticipantService, ParticipantService>();
-builder.Services.AddScoped<IParticipantRepository, ParticipantRepository>();
-builder.Services.AddScoped<IRoundService, RoundService>();
-builder.Services.AddScoped<IRoundRepository, RoundRepository>();
-builder.Services.AddScoped<IMatchService, MatchService>();
-builder.Services.AddScoped<IMatchRepository, MatchRepository>();
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<DatabaseSeeder>();
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-builder.Services.AddAutoMapper(typeof(ApiMappingProfile));
+// Authentication
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -72,6 +79,9 @@ builder
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         };
     });
+
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -108,38 +118,39 @@ builder.Services.AddSwaggerGen(c =>
         }
     );
 });
+
 WebApplication app = builder.Build();
-using (IServiceScope scope = app.Services.CreateScope())
+
+using (var scope = app.Services.CreateScope())
 {
-    IServiceProvider services = scope.ServiceProvider;
+    var services = scope.ServiceProvider;
     try
     {
-        TournamentContext context = services.GetRequiredService<TournamentContext>();
-        ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
+        var context = services.GetRequiredService<TournamentContext>();
+        var logger = services.GetRequiredService<ILogger<Program>>();
+
         logger.LogInformation("Attempting to ensure database exists and is up to date");
-
         context.Database.Migrate();
-
         logger.LogInformation("Database setup completed successfully");
     }
     catch (Exception ex)
     {
-        ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
+        var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while setting up the database.");
         throw;
     }
-    DatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+
+    var seeder = services.GetRequiredService<DatabaseSeeder>();
     await seeder.SeedAsync();
 }
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("AllowReactApp");
+
 app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 

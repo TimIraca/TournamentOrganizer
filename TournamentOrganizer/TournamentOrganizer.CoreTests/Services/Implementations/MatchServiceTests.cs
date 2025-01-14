@@ -3,8 +3,8 @@ using Moq;
 using TournamentOrganizer.Core;
 using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.Services.Implementations;
+using TournamentOrganizer.Core.Services.Interfaces;
 using TournamentOrganizer.DAL.Entities;
-using TournamentOrganizer.DAL.Repositories.Interfaces;
 using Match = TournamentOrganizer.DAL.Entities.Match;
 
 namespace TournamentOrganizer.CoreTests.Services.Implementations
@@ -35,7 +35,7 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         {
             // Arrange
             Guid matchId = Guid.NewGuid();
-            Match match = new Match { Id = matchId, Participant1Id = Guid.NewGuid() };
+            MatchCoreDto match = new MatchCoreDto { Id = matchId, Participant1Id = Guid.NewGuid() };
             MatchCoreDto expectedDto = new MatchCoreDto { Id = matchId };
 
             _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync(match);
@@ -57,7 +57,9 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         {
             // Arrange
             Guid matchId = Guid.NewGuid();
-            _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync((Match)null);
+            _mockMatchRepository
+                .Setup(r => r.GetByIdAsync(matchId))
+                .ReturnsAsync((MatchCoreDto)null);
 
             // Act
             await _service.GetByIdAsync(matchId);
@@ -70,10 +72,10 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         {
             // Arrange
             Guid roundId = Guid.NewGuid();
-            List<Match> matches = new List<Match>
+            List<MatchCoreDto> matches = new List<MatchCoreDto>
             {
-                new Match { Id = Guid.NewGuid() },
-                new Match { Id = Guid.NewGuid() },
+                new MatchCoreDto { Id = Guid.NewGuid() },
+                new MatchCoreDto { Id = Guid.NewGuid() },
             };
             List<MatchCoreDto> expectedDtos = matches
                 .Select(m => new MatchCoreDto { Id = m.Id })
@@ -104,11 +106,11 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
                 Participant1Id = Guid.NewGuid(),
                 Participant2Id = Guid.NewGuid(),
             };
-            Match matchEntity = new Match { Id = inputDto.Id };
-            Match addedMatch = new Match { Id = inputDto.Id };
+            MatchCoreDto matchEntity = new MatchCoreDto { Id = inputDto.Id };
+            MatchCoreDto addedMatch = new MatchCoreDto { Id = inputDto.Id };
             MatchCoreDto expectedDto = new MatchCoreDto { Id = inputDto.Id };
 
-            _mockMapper.Setup(m => m.Map<Match>(inputDto)).Returns(matchEntity);
+            _mockMapper.Setup(m => m.Map<MatchCoreDto>(inputDto)).Returns(matchEntity);
             _mockMatchRepository.Setup(r => r.AddAsync(matchEntity)).ReturnsAsync(addedMatch);
             _mockMapper.Setup(m => m.Map<MatchCoreDto>(addedMatch)).Returns(expectedDto);
 
@@ -127,7 +129,7 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
             // Arrange
             Guid matchId = Guid.NewGuid();
             MatchCoreDto inputDto = new MatchCoreDto { Id = matchId };
-            Match existingMatch = new Match { Id = matchId };
+            MatchCoreDto existingMatch = new MatchCoreDto { Id = matchId };
             Match matchEntity = new Match { Id = matchId };
 
             _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync(existingMatch);
@@ -137,7 +139,7 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
             await _service.UpdateAsync(inputDto);
 
             // Assert
-            _mockMatchRepository.Verify(r => r.UpdateAsync(matchEntity), Times.Once);
+            _mockMatchRepository.Verify(r => r.UpdateAsync(It.IsAny<MatchCoreDto>()), Times.Once);
         }
 
         [TestMethod]
@@ -146,7 +148,9 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         {
             // Arrange
             MatchCoreDto inputDto = new MatchCoreDto { Id = Guid.NewGuid() };
-            _mockMatchRepository.Setup(r => r.GetByIdAsync(inputDto.Id)).ReturnsAsync((Match)null);
+            _mockMatchRepository
+                .Setup(r => r.GetByIdAsync(inputDto.Id))
+                .ReturnsAsync((MatchCoreDto)null);
 
             // Act
             await _service.UpdateAsync(inputDto);
@@ -159,7 +163,7 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         {
             // Arrange
             Guid matchId = Guid.NewGuid();
-            Match existingMatch = new Match { Id = matchId };
+            MatchCoreDto existingMatch = new MatchCoreDto { Id = matchId };
 
             _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync(existingMatch);
 
@@ -176,7 +180,9 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
         {
             // Arrange
             Guid matchId = Guid.NewGuid();
-            _mockMatchRepository.Setup(r => r.GetByIdAsync(matchId)).ReturnsAsync((Match)null);
+            _mockMatchRepository
+                .Setup(r => r.GetByIdAsync(matchId))
+                .ReturnsAsync((MatchCoreDto)null);
 
             // Act
             await _service.DeleteAsync(matchId);
@@ -195,7 +201,7 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
 
             _mockRoundRepository
                 .Setup(r => r.GetAllByTournamentIdAsync(tournamentId))
-                .ReturnsAsync(new List<Round>());
+                .ReturnsAsync(new List<RoundCoreDto>());
 
             // Act
             await _service.DeclareMatchWinnerAsync(tournamentId, matchId, winnerId);
@@ -211,13 +217,16 @@ namespace TournamentOrganizer.CoreTests.Services.Implementations
             Guid tournamentId = Guid.NewGuid();
             Guid matchId = Guid.NewGuid();
             Guid winnerId = Guid.NewGuid();
-            Match match = new Match
+            MatchCoreDto match = new MatchCoreDto
             {
                 Id = matchId,
                 Participant1Id = Guid.NewGuid(),
                 Participant2Id = Guid.NewGuid(),
             };
-            List<Round> rounds = new List<Round> { new Round { Id = Guid.NewGuid() } };
+            List<RoundCoreDto> rounds = new List<RoundCoreDto>
+            {
+                new RoundCoreDto { Id = Guid.NewGuid() },
+            };
 
             _mockRoundRepository
                 .Setup(r => r.GetAllByTournamentIdAsync(tournamentId))
