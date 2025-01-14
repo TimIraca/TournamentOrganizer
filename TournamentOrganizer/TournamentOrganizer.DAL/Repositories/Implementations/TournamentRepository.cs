@@ -44,7 +44,8 @@ namespace TournamentOrganizer.DAL.Repositories.Implementations
             Tournament tournamentEntity = _mapper.Map<Tournament>(tournament);
             await _context.Tournaments.AddAsync(tournamentEntity);
             await _context.SaveChangesAsync();
-            return tournament;
+
+            return _mapper.Map<TournamentCoreDto>(tournamentEntity);
         }
 
         public async Task UpdateAsync(TournamentCoreDto tournament, Guid userId)

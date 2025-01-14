@@ -53,7 +53,7 @@ namespace TournamentOrganizer.Core.Services.Implementations
             TournamentCoreDto createdTournament = await _tournamentRepository.AddAsync(tournament);
 
             // Map the created entity back to a Core DTO
-            return _mapper.Map<TournamentCoreDto>(createdTournament);
+            return createdTournament;
         }
 
         public async Task UpdateTournamentAsync(TournamentCoreDto tournamentDto, Guid userId)
