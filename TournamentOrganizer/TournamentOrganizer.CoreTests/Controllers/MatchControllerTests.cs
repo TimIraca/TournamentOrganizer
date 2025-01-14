@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using TournamentOrganizer.api.Controllers;
-using TournamentOrganizer.api.DTOs;
+﻿using TournamentOrganizer.api.DTOs;
 using TournamentOrganizer.Core;
 using TournamentOrganizer.Core.DTOs;
 
@@ -18,6 +8,7 @@ namespace TournamentOrganizer.api.Controllers.Tests
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using AutoMapper;
+    using global::TournamentOrganizer.Core.Interfaces.Services;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
