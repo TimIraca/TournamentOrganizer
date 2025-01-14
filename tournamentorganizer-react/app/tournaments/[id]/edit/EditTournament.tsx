@@ -287,6 +287,7 @@ export default function EditTournament() {
                 data-cy="start-tournament-button"
                 variant="default"
                 onClick={() => setActiveDialog("start")}
+                style={{ backgroundColor: "limegreen", color: "white" }}
               >
                 Start Tournament
               </Button>
