@@ -34,7 +34,6 @@ namespace TournamentOrganizer.api.Controllers
         // POST: api/tournaments/{tournamentId}/participants
         [HttpPost]
         [ProducesResponseType(typeof(ParticipantApiDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddParticipant(
             Guid tournamentId,
             [FromBody] CreateParticipantApiDto apiDto
