@@ -38,7 +38,8 @@ Cypress.Commands.add('declareWinner', (matchNumber) => {
     .find('[data-cy$="-trigger"]')
     .first()
     .click();
-
-  cy.get('[data-cy^="declare-winner-"]').click();
-  cy.get('[data-cy="match-updating"]').should('not.exist');
+    cy.get('[data-cy^="declare-winner-"]').click();
+    cy.get(`[data-match-number="${matchNumber}"]`)
+    .find('[data-cy="winnerbadge"]')
+    .should('exist');
 });

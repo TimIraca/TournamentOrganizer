@@ -245,7 +245,11 @@ function MatchCard({
                 >
                   <span>{participant.name}</span>
                   {match.winnerId === participant.id && (
-                    <Badge variant="secondary" className="bg-winner">
+                    <Badge
+                      variant="secondary"
+                      className="bg-winner"
+                      data-cy="winnerbadge"
+                    >
                       <Trophy className="w-4 h-4 mr-1" />
                       Winner
                     </Badge>
