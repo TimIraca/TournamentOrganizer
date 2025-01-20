@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using TournamentOrganizer.api.DTOs;
+using TournamentOrganizer.api.Hubs;
 using TournamentOrganizer.Core;
 using TournamentOrganizer.Core.DTOs;
 using TournamentOrganizer.Core.Interfaces.Services;
@@ -13,11 +15,17 @@ namespace TournamentOrganizer.api.Controllers
     {
         private readonly IMatchService _matchService;
         private readonly IMapper _mapper;
+        private readonly IHubContext<MatchHub> _hubContext;
 
-        public MatchController(IMatchService matchService, IMapper mapper)
+        public MatchController(
+            IMatchService matchService,
+            IMapper mapper,
+            IHubContext<MatchHub> hubContext
+        )
         {
             _matchService = matchService;
             _mapper = mapper;
+            _hubContext = hubContext;
         }
 
         [HttpGet("round/{roundId}")]
@@ -119,6 +127,15 @@ namespace TournamentOrganizer.api.Controllers
                     matchId,
                     request.WinnerId
                 );
+
+                await _hubContext
+                    .Clients.Group(tournamentId.ToString())
+                    .SendAsync(MatchHub.MatchUpdated, matchId, request.WinnerId);
+
+                await _hubContext
+                    .Clients.Group(tournamentId.ToString())
+                    .SendAsync(MatchHub.TournamentUpdated, tournamentId);
+
                 return Ok();
             }
             catch (NotFoundException ex)
