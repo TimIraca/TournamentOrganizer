@@ -92,6 +92,17 @@ public class TournamentsController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("{id}/reset")]
+    public async Task<IActionResult> ResetTournament(Guid id)
+    {
+        var userId = GetCurrentUserId();
+        TournamentCoreDto? coreDto = await _tournamentService.GetTournamentByIdAsync(id, userId);
+        if (coreDto == null)
+            return NotFound();
+        await _tournamentService.ResetTournamentAsync(id, userId);
+        return Ok();
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTournament(
         Guid id,

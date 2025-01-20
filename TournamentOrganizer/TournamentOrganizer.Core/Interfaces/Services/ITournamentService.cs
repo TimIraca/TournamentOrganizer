@@ -17,5 +17,6 @@ namespace TournamentOrganizer.Core.Interfaces.Services
         Task DeleteTournamentAsync(Guid id, Guid userId);
         Task<TournamentOverviewDto?> GetTournamentOverviewAsync(Guid tournamentId, Guid userId);
         Task StartTournamentAsync(Guid tournamentId, Guid userId);
+        Task ResetTournamentAsync(Guid tournamentId, Guid userId);
     }
 }
