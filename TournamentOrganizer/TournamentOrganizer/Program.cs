@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using TournamentOrganizer.api.Hubs;
 using TournamentOrganizer.api.Mappings;
 using TournamentOrganizer.Core.Implementations;
 using TournamentOrganizer.Core.Interfaces.Repositories;
@@ -39,6 +40,8 @@ builder.Services.AddAutoMapper(typeof(ApiMappingProfile));
 
 // Controllers
 builder.Services.AddControllers();
+
+builder.Services.AddSignalR();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -149,7 +152,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.MapHub<MatchHub>("/api/hubs/match");
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 app.UseAuthentication();

@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { tournamentApi } from "@/lib/api";
 import React from "react";
 import { GeneralDropdownMenu } from "@/components/general-dropdown-menu";
+import { signalRService } from "@/lib/signalR";
 
 interface TournamentBracketProps {
   tournamentId: string;
@@ -67,9 +68,47 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
   };
 
   useEffect(() => {
+    const initializeSignalR = async () => {
+      await signalRService.startConnection();
+      await signalRService.joinTournament(tournamentId);
+
+      signalRService.onMatchUpdated((matchId, winnerId) => {
+        setTournament((prevTournament) => {
+          if (!prevTournament) return null;
+
+          const updatedRounds = prevTournament.rounds.map((round) => ({
+            ...round,
+            matches: round.matches.map((match) =>
+              match.id === matchId ? { ...match, winnerId } : match
+            ),
+          }));
+
+          return {
+            ...prevTournament,
+            rounds: updatedRounds,
+          };
+        });
+      });
+
+      signalRService.onTournamentUpdated((updatedTournamentId) => {
+        if (updatedTournamentId === tournamentId) {
+          fetchTournamentData();
+        }
+      });
+    };
+
     if (tournamentId) {
+      initializeSignalR();
       fetchTournamentData();
     }
+
+    return () => {
+      if (tournamentId) {
+        signalRService.leaveTournament(tournamentId);
+        signalRService.removeMatchListener();
+        signalRService.removeTournamentListener();
+      }
+    };
   }, [tournamentId]);
 
   if (loading) {
