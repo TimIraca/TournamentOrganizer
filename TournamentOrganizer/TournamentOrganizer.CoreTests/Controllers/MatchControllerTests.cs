@@ -1,256 +1,315 @@
-﻿using TournamentOrganizer.api.DTOs;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using TournamentOrganizer.api.Controllers;
+using TournamentOrganizer.api.DTOs;
+using TournamentOrganizer.api.Hubs;
 using TournamentOrganizer.Core;
 using TournamentOrganizer.Core.DTOs;
+using TournamentOrganizer.Core.Interfaces.Services;
 
-namespace TournamentOrganizer.api.Controllers.Tests
+namespace TournamentOrganizer.CoreTests.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using AutoMapper;
-    using global::TournamentOrganizer.Core.Interfaces.Services;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-
-    namespace TournamentOrganizer.Tests.Controllers
+    [TestClass]
+    public class MatchControllerTests
     {
-        [TestClass]
-        public class MatchControllerTests
+        private Mock<IMatchService> _mockMatchService;
+        private Mock<IMapper> _mockMapper;
+        private Mock<IHubContext<MatchHub>> _mockHub;
+        private Mock<IHubClients> _mockClients;
+        private Mock<IClientProxy> _mockClientProxy;
+        private MatchController _controller;
+        private readonly Guid _tournamentId = Guid.NewGuid();
+
+        [TestInitialize]
+        public void Setup()
         {
-            private Mock<IMatchService> _mockMatchService;
-            private Mock<IMapper> _mockMapper;
-            private MatchController _controller;
+            _mockMatchService = new Mock<IMatchService>();
+            _mockMapper = new Mock<IMapper>();
+            _mockHub = new Mock<IHubContext<MatchHub>>();
+            _mockClients = new Mock<IHubClients>();
+            _mockClientProxy = new Mock<IClientProxy>();
 
-            [TestInitialize]
-            public void Setup()
-            {
-                _mockMatchService = new Mock<IMatchService>();
-                _mockMapper = new Mock<IMapper>();
-                _controller = new MatchController(_mockMatchService.Object, _mockMapper.Object);
-            }
+            // Setup SignalR hub mocks
+            _mockHub.Setup(h => h.Clients).Returns(_mockClients.Object);
+            _mockClients.Setup(c => c.Group(It.IsAny<string>())).Returns(_mockClientProxy.Object);
 
-            [TestMethod]
-            public async Task GetMatchesByRoundId_ReturnsOkResult_WithMappedMatches()
-            {
-                // Arrange
-                Guid roundId = Guid.NewGuid();
-                List<MatchCoreDto> coreDtos = new List<MatchCoreDto>
-                {
-                    new() { Id = Guid.NewGuid() },
-                };
-                List<MatchApiDto> apiDtos = new List<MatchApiDto> { new() { Id = coreDtos[0].Id } };
+            // Explicitly specify parameters for SendAsync
+            _mockClientProxy
+                .Setup(x =>
+                    x.SendCoreAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<object[]>(),
+                        It.IsAny<CancellationToken>()
+                    )
+                )
+                .Returns(Task.CompletedTask);
+            _controller = new MatchController(
+                _mockMatchService.Object,
+                _mockMapper.Object,
+                _mockHub.Object
+            );
+        }
 
-                _mockMatchService
-                    .Setup(s => s.GetAllByRoundIdAsync(roundId))
-                    .ReturnsAsync(coreDtos);
-                _mockMapper.Setup(m => m.Map<IEnumerable<MatchApiDto>>(coreDtos)).Returns(apiDtos);
+        [TestMethod]
+        public async Task GetMatchesByRoundId_ReturnsOkResult_WithMappedMatches()
+        {
+            // Arrange
+            var roundId = Guid.NewGuid();
+            var coreDtos = new List<MatchCoreDto> { new() { Id = Guid.NewGuid() } };
+            var apiDtos = new List<MatchApiDto> { new() { Id = coreDtos[0].Id } };
 
-                // Act
-                IActionResult result = await _controller.GetMatchesByRoundId(roundId);
+            _mockMatchService.Setup(s => s.GetAllByRoundIdAsync(roundId)).ReturnsAsync(coreDtos);
+            _mockMapper.Setup(m => m.Map<IEnumerable<MatchApiDto>>(coreDtos)).Returns(apiDtos);
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(OkObjectResult));
-                OkObjectResult okResult = (OkObjectResult)result;
-                IEnumerable<MatchApiDto>? returnedDtos = (IEnumerable<MatchApiDto>)okResult.Value;
-                CollectionAssert.AreEqual(apiDtos, new List<MatchApiDto>(returnedDtos));
-            }
+            // Act
+            var result = await _controller.GetMatchesByRoundId(roundId);
 
-            [TestMethod]
-            public async Task GetMatchesByRoundId_ReturnsServerError_WhenExceptionOccurs()
-            {
-                // Arrange
-                Guid roundId = Guid.NewGuid();
-                _mockMatchService
-                    .Setup(s => s.GetAllByRoundIdAsync(roundId))
-                    .ThrowsAsync(new Exception("Test error"));
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+            var okResult = (OkObjectResult)result;
+            var returnedDtos = (IEnumerable<MatchApiDto>)okResult.Value;
+            CollectionAssert.AreEqual(apiDtos, new List<MatchApiDto>(returnedDtos));
+        }
 
-                // Act
-                IActionResult result = await _controller.GetMatchesByRoundId(roundId);
+        [TestMethod]
+        public async Task GetMatchesByRoundId_ReturnsServerError_WhenExceptionOccurs()
+        {
+            // Arrange
+            var roundId = Guid.NewGuid();
+            _mockMatchService
+                .Setup(s => s.GetAllByRoundIdAsync(roundId))
+                .ThrowsAsync(new Exception("Test error"));
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(ObjectResult));
-                ObjectResult statusResult = (ObjectResult)result;
-                Assert.AreEqual(500, statusResult.StatusCode);
-                Assert.AreEqual("Test error", statusResult.Value);
-            }
+            // Act
+            var result = await _controller.GetMatchesByRoundId(roundId);
 
-            [TestMethod]
-            public async Task GetMatchById_ReturnsOkResult_WhenMatchExists()
-            {
-                // Arrange
-                Guid matchId = Guid.NewGuid();
-                MatchCoreDto coreDto = new MatchCoreDto { Id = matchId };
-                MatchApiDto apiDto = new MatchApiDto { Id = matchId };
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(ObjectResult));
+            var statusResult = (ObjectResult)result;
+            Assert.AreEqual(500, statusResult.StatusCode);
+            Assert.AreEqual("Test error", statusResult.Value);
+        }
 
-                _mockMatchService.Setup(s => s.GetByIdAsync(matchId)).ReturnsAsync(coreDto);
-                _mockMapper.Setup(m => m.Map<MatchApiDto>(coreDto)).Returns(apiDto);
+        [TestMethod]
+        public async Task GetMatchById_ReturnsOkResult_WhenMatchExists()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+            var coreDto = new MatchCoreDto { Id = matchId };
+            var apiDto = new MatchApiDto { Id = matchId };
 
-                // Act
-                IActionResult result = await _controller.GetMatchById(matchId);
+            _mockMatchService.Setup(s => s.GetByIdAsync(matchId)).ReturnsAsync(coreDto);
+            _mockMapper.Setup(m => m.Map<MatchApiDto>(coreDto)).Returns(apiDto);
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(OkObjectResult));
-                OkObjectResult okResult = (OkObjectResult)result;
-                Assert.AreEqual(apiDto, okResult.Value);
-            }
+            // Act
+            var result = await _controller.GetMatchById(matchId);
 
-            [TestMethod]
-            public async Task GetMatchById_ReturnsNotFound_WhenMatchDoesNotExist()
-            {
-                // Arrange
-                Guid matchId = Guid.NewGuid();
-                _mockMatchService
-                    .Setup(s => s.GetByIdAsync(matchId))
-                    .ThrowsAsync(new NotFoundException($"Match with ID {matchId} not found"));
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+            var okResult = (OkObjectResult)result;
+            Assert.AreEqual(apiDto, okResult.Value);
+        }
 
-                // Act
-                IActionResult result = await _controller.GetMatchById(matchId);
+        [TestMethod]
+        public async Task GetMatchById_ReturnsNotFound_WhenMatchDoesNotExist()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+            _mockMatchService
+                .Setup(s => s.GetByIdAsync(matchId))
+                .ThrowsAsync(new NotFoundException($"Match with ID {matchId} not found"));
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
-                NotFoundObjectResult notFoundResult = (NotFoundObjectResult)result;
-                Assert.AreEqual($"Match with ID {matchId} not found", notFoundResult.Value);
-            }
+            // Act
+            var result = await _controller.GetMatchById(matchId);
 
-            [TestMethod]
-            public async Task AddMatch_ReturnsCreatedAtAction_WhenSuccessful()
-            {
-                // Arrange
-                MatchApiDto apiDto = new MatchApiDto { Id = Guid.NewGuid() };
-                MatchCoreDto coreDto = new MatchCoreDto { Id = apiDto.Id };
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
+            var notFoundResult = (NotFoundObjectResult)result;
+            Assert.AreEqual($"Match with ID {matchId} not found", notFoundResult.Value);
+        }
 
-                _mockMapper.Setup(m => m.Map<MatchCoreDto>(apiDto)).Returns(coreDto);
-                _mockMatchService.Setup(s => s.AddAsync(coreDto)).ReturnsAsync(coreDto);
-                _mockMapper.Setup(m => m.Map<MatchApiDto>(coreDto)).Returns(apiDto);
+        [TestMethod]
+        public async Task AddMatch_ReturnsCreatedAtAction_WhenSuccessful()
+        {
+            // Arrange
+            var apiDto = new MatchApiDto { Id = Guid.NewGuid() };
+            var coreDto = new MatchCoreDto { Id = apiDto.Id };
 
-                // Act
-                IActionResult result = await _controller.AddMatch(apiDto);
+            _mockMapper.Setup(m => m.Map<MatchCoreDto>(apiDto)).Returns(coreDto);
+            _mockMatchService.Setup(s => s.AddAsync(coreDto)).ReturnsAsync(coreDto);
+            _mockMapper.Setup(m => m.Map<MatchApiDto>(coreDto)).Returns(apiDto);
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(CreatedAtActionResult));
-                CreatedAtActionResult createdResult = (CreatedAtActionResult)result;
-                Assert.AreEqual(nameof(MatchController.GetMatchById), createdResult.ActionName);
-                Assert.AreEqual(apiDto.Id, ((dynamic)createdResult.RouteValues!)["id"]);
-                Assert.AreEqual(apiDto, createdResult.Value);
-            }
+            // Act
+            var result = await _controller.AddMatch(apiDto);
 
-            [TestMethod]
-            public async Task UpdateMatch_ReturnsNoContent_WhenSuccessful()
-            {
-                // Arrange
-                Guid matchId = Guid.NewGuid();
-                MatchApiDto apiDto = new MatchApiDto { Id = matchId };
-                MatchCoreDto coreDto = new MatchCoreDto { Id = matchId };
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(CreatedAtActionResult));
+            var createdResult = (CreatedAtActionResult)result;
+            Assert.AreEqual(nameof(MatchController.GetMatchById), createdResult.ActionName);
+            Assert.AreEqual(apiDto.Id, ((dynamic)createdResult.RouteValues)["id"]);
+            Assert.AreEqual(apiDto, createdResult.Value);
+        }
 
-                _mockMapper.Setup(m => m.Map<MatchCoreDto>(apiDto)).Returns(coreDto);
+        [TestMethod]
+        public async Task UpdateMatch_ReturnsNoContent_WhenSuccessful()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+            var apiDto = new MatchApiDto { Id = matchId };
+            var coreDto = new MatchCoreDto { Id = matchId };
 
-                // Act
-                IActionResult result = await _controller.UpdateMatch(matchId, apiDto);
+            _mockMapper.Setup(m => m.Map<MatchCoreDto>(apiDto)).Returns(coreDto);
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(NoContentResult));
-            }
+            // Act
+            var result = await _controller.UpdateMatch(matchId, apiDto);
 
-            [TestMethod]
-            public async Task UpdateMatch_ReturnsBadRequest_WhenIdMismatch()
-            {
-                // Arrange
-                Guid matchId = Guid.NewGuid();
-                Guid differentId = Guid.NewGuid();
-                MatchApiDto apiDto = new MatchApiDto { Id = differentId };
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NoContentResult));
+        }
 
-                // Act
-                IActionResult result = await _controller.UpdateMatch(matchId, apiDto);
+        [TestMethod]
+        public async Task UpdateMatch_ReturnsBadRequest_WhenIdMismatch()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+            var differentId = Guid.NewGuid();
+            var apiDto = new MatchApiDto { Id = differentId };
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
-                BadRequestObjectResult badRequestResult = (BadRequestObjectResult)result;
-                Assert.AreEqual("ID mismatch between URL and body", badRequestResult.Value);
-            }
+            // Act
+            var result = await _controller.UpdateMatch(matchId, apiDto);
 
-            [TestMethod]
-            public async Task DeclareWinner_ReturnsOk_WhenSuccessful()
-            {
-                // Arrange
-                Guid matchId = Guid.NewGuid();
-                Guid tournamentId = Guid.NewGuid();
-                Guid winnerId = Guid.NewGuid();
-                DeclareWinnerRequestDto request = new DeclareWinnerRequestDto
-                {
-                    WinnerId = winnerId,
-                };
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+            var badRequestResult = (BadRequestObjectResult)result;
+            Assert.AreEqual("ID mismatch between URL and body", badRequestResult.Value);
+        }
 
-                // Act
-                IActionResult result = await _controller.DeclareWinner(
-                    matchId,
-                    tournamentId,
-                    request
-                );
+        [TestMethod]
+        public async Task DeclareWinner_ReturnsOk_WhenSuccessful()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+            var winnerId = Guid.NewGuid();
+            var request = new DeclareWinnerRequestDto { WinnerId = winnerId };
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(OkResult));
-            }
+            // Act
+            var result = await _controller.DeclareWinner(matchId, _tournamentId, request);
 
-            [TestMethod]
-            public async Task DeclareWinner_ReturnsBadRequest_WhenPlayerNotInMatch()
-            {
-                // Arrange
-                Guid matchId = Guid.NewGuid();
-                Guid tournamentId = Guid.NewGuid();
-                Guid winnerId = Guid.NewGuid();
-                DeclareWinnerRequestDto request = new DeclareWinnerRequestDto
-                {
-                    WinnerId = winnerId,
-                };
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(OkResult));
 
-                _mockMatchService
-                    .Setup(s => s.DeclareMatchWinnerAsync(tournamentId, matchId, winnerId))
-                    .ThrowsAsync(new InvalidOperationException("Player is not a participant"));
+            // Verify SignalR messages were sent
+            _mockClientProxy.Verify(
+                x =>
+                    x.SendCoreAsync(
+                        MatchHub.MatchUpdated,
+                        It.Is<object[]>(args =>
+                            args[0].Equals(matchId) && args[1].Equals(winnerId)
+                        ),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
 
-                // Act
-                IActionResult result = await _controller.DeclareWinner(
-                    matchId,
-                    tournamentId,
-                    request
-                );
+            _mockClientProxy.Verify(
+                x =>
+                    x.SendCoreAsync(
+                        MatchHub.TournamentUpdated,
+                        It.Is<object[]>(args => args[0].Equals(_tournamentId)),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
+        }
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
-                BadRequestObjectResult badRequestResult = (BadRequestObjectResult)result;
-                Assert.AreEqual("Player is not a participant", badRequestResult.Value);
-            }
+        [TestMethod]
+        public async Task DeclareWinner_ReturnsBadRequest_WhenPlayerNotInMatch()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+            var winnerId = Guid.NewGuid();
+            var request = new DeclareWinnerRequestDto { WinnerId = winnerId };
 
-            [TestMethod]
-            public async Task DeleteMatch_ReturnsNoContent_WhenSuccessful()
-            {
-                // Arrange
-                Guid matchId = Guid.NewGuid();
+            _mockMatchService
+                .Setup(s => s.DeclareMatchWinnerAsync(_tournamentId, matchId, winnerId))
+                .ThrowsAsync(new InvalidOperationException("Player is not a participant"));
 
-                // Act
-                IActionResult result = await _controller.DeleteMatch(matchId);
+            // Act
+            var result = await _controller.DeclareWinner(matchId, _tournamentId, request);
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(NoContentResult));
-            }
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
+            var badRequestResult = (BadRequestObjectResult)result;
+            Assert.AreEqual("Player is not a participant", badRequestResult.Value);
 
-            [TestMethod]
-            public async Task DeleteMatch_ReturnsNotFound_WhenMatchDoesNotExist()
-            {
-                // Arrange
-                Guid matchId = Guid.NewGuid();
-                _mockMatchService
-                    .Setup(s => s.DeleteAsync(matchId))
-                    .ThrowsAsync(new NotFoundException($"Match with ID {matchId} not found"));
+            // Verify no SignalR messages were sent
+            _mockClientProxy.Verify(
+                x =>
+                    x.SendCoreAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<object[]>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Never
+            );
+        }
 
-                // Act
-                IActionResult result = await _controller.DeleteMatch(matchId);
+        [TestMethod]
+        public async Task DeclareWinner_ReturnsNotFound_WhenMatchNotFound()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+            var winnerId = Guid.NewGuid();
+            var request = new DeclareWinnerRequestDto { WinnerId = winnerId };
 
-                // Assert
-                Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
-                NotFoundObjectResult notFoundResult = (NotFoundObjectResult)result;
-                Assert.AreEqual($"Match with ID {matchId} not found", notFoundResult.Value);
-            }
+            _mockMatchService
+                .Setup(s => s.DeclareMatchWinnerAsync(_tournamentId, matchId, winnerId))
+                .ThrowsAsync(new NotFoundException("Match not found"));
+
+            // Act
+            var result = await _controller.DeclareWinner(matchId, _tournamentId, request);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
+            var notFoundResult = (NotFoundObjectResult)result;
+            Assert.AreEqual("Match not found", notFoundResult.Value);
+        }
+
+        [TestMethod]
+        public async Task DeleteMatch_ReturnsNoContent_WhenSuccessful()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+
+            // Act
+            var result = await _controller.DeleteMatch(matchId);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NoContentResult));
+        }
+
+        [TestMethod]
+        public async Task DeleteMatch_ReturnsNotFound_WhenMatchDoesNotExist()
+        {
+            // Arrange
+            var matchId = Guid.NewGuid();
+            _mockMatchService
+                .Setup(s => s.DeleteAsync(matchId))
+                .ThrowsAsync(new NotFoundException($"Match with ID {matchId} not found"));
+
+            // Act
+            var result = await _controller.DeleteMatch(matchId);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
+            var notFoundResult = (NotFoundObjectResult)result;
+            Assert.AreEqual($"Match with ID {matchId} not found", notFoundResult.Value);
         }
     }
 }
