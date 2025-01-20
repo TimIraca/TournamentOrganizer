@@ -130,5 +130,21 @@ namespace TournamentOrganizer.Core.Implementations
                 ),
             };
         }
+
+        public async Task ResetTournamentAsync(Guid id, Guid userId)
+        {
+            TournamentCoreDto tournament =
+                await _tournamentRepository.GetByIdAsync(id, userId)
+                ?? throw new InvalidOperationException("Tournament not found");
+            // Delete all rounds and matches
+            IEnumerable<RoundCoreDto> rounds = await _roundRepository.GetAllByTournamentIdAsync(id);
+            foreach (RoundCoreDto round in rounds)
+            {
+                await _roundRepository.DeleteAsync(round.Id);
+            }
+            // Update tournament to not completed
+            tournament.IsCompleted = false;
+            await _tournamentRepository.UpdateAsync(tournament, userId);
+        }
     }
 }
