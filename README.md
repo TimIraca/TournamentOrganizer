@@ -9,9 +9,7 @@ A full-stack web application for creating and managing single-elimination tourna
 - **Single Elimination Tournaments**: Create brackets for any number of participants
 - **Real-time Match Updates**: Live updates for participants and viewers
 - **Automated Advancement**: Winners automatically progress to the next round
-- **Responsive Design**: Optimal experience on desktop and mobile devices
 - **User Authentication**: Secure tournament creation and management
-- **Custom Tournament Settings**: Customize tournament rules and parameters
 
 ## Tech Stack
 
@@ -25,3 +23,4 @@ A full-stack web application for creating and managing single-elimination tourna
 - **Next.js**: React framework for server-side rendering and static site generation
 - **TypeScript**: Type-safe JavaScript
 
+The goal of this project was to learn how to properly build and deploy a full-stack application. Not everything is perfect, in a perfect world i would have also included multiple tournament types, participant viewing and proper mobile layouts. Feel free to use this project to explore and learn or build upon it yourself.
